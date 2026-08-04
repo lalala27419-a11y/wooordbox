@@ -507,8 +507,11 @@ body{
   -webkit-font-smoothing:antialiased; overflow-x:hidden;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
+.gears{position:absolute;inset:0;pointer-events:none;z-index:0}
+body{position:relative}
 .wrap{max-width:880px;margin:0 auto;padding:20px 18px 40px;position:relative;z-index:1}
 /* 自定义背景层。压在皮肤底色之上、内容之下 */
+#bgimg[hidden]{display:none}
 #bgimg{position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;
   background-position:center;background-repeat:no-repeat;opacity:var(--bg-op,.5)}
 .bgrow{display:flex;align-items:center;gap:12px;margin-top:9px}
@@ -1102,6 +1105,15 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
   font-size:11.5px;line-height:1.85;color:var(--ft)}
 .tkn b{color:var(--dm)}
 @media (max-width:640px){
+  /* 手机上关掉背后模糊。backdrop-filter 每一块都是一个合成层，
+     十几块叠在一起足以把 Safari 的图层预算挤爆 —— 症状就是整屏内容不绘制。
+     换成不透明面，肉眼几乎看不出差别。 */
+  .kpaper,.kgn,.kdist,.tkr,.kcmp,.panel,dialog{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  #dTrek[data-mode="paper"] .kpaper,#dTrek[data-mode="paper"] .kgn,
+  #dTrek[data-mode="paper"] .kdist,#dTrek[data-mode="paper"] .tkr{background:rgba(252,246,232,.94)}
+  #dTrek[data-mode="night"] .kpaper,#dTrek[data-mode="night"] .kgn,
+  #dTrek[data-mode="night"] .kdist,#dTrek[data-mode="night"] .tkr{background:rgba(17,27,40,.94)}
   #dTrek{width:calc(100% - 20px)}
   .tkin{padding:0 13px 26px}
   .kleg{height:160px}
@@ -1135,13 +1147,24 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 /* 三颗齿轮，明显地转。prefers-reduced-motion 下全局已经关掉动画 */
 /* 齿轮画成 SVG，不用 ⚙ 那个字符 —— 桌面把它当文字渲染成纯色轮廓，
    手机（尤其 iOS）会替换成彩色 emoji 字体的写实图标，两边完全不是一个东西。 */
-[data-skin="y2k"] body::before{content:"";position:fixed;top:56px;right:-70px;
+/* 齿轮。原来这两个是 body 上永动的 position:fixed 伪元素 —— iOS 会把它们
+   提成独立合成层，和 .wrap 里那一堆磨砂玻璃/拉丝金属一起挤爆图层预算，
+   结果是整块内容的绘制被丢掉：DOM 都在，屏幕上什么都没有，只能杀进程。
+   现在挪进 .wrap 之前的一个专用容器，用 absolute 定位、不参与滚动合成，
+   而且默认不转 —— 动效不值得拿整屏的可见性去换。 */
+[data-skin="y2k"] .gears{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+[data-skin="y2k"] .gears::before{content:"";position:absolute;top:56px;right:-70px;
   width:300px;height:300px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' fill='rgba(48,66,90,0.16)' d='M99.8 45.6L99.8 54.4L88.5 56.3L86.5 63.8L95.4 71.1L90.9 78.8L80.2 74.7L74.7 80.2L78.8 90.9L71.1 95.4L63.8 86.5L56.3 88.5L54.4 99.8L45.6 99.8L43.7 88.5L36.2 86.5L28.9 95.4L21.2 90.9L25.3 80.2L19.8 74.7L9.1 78.8L4.6 71.1L13.5 63.8L11.5 56.3L0.2 54.4L0.2 45.6L11.5 43.7L13.5 36.2L4.6 28.9L9.1 21.2L19.8 25.3L25.3 19.8L21.2 9.1L28.9 4.6L36.2 13.5L43.7 11.5L45.6 0.2L54.4 0.2L56.3 11.5L63.8 13.5L71.1 4.6L78.8 9.1L74.7 19.8L80.2 25.3L90.9 21.2L95.4 28.9L86.5 36.2L88.5 43.7Z M50 33A17 17 0 1 0 50 67 A17 17 0 1 0 50 33Z'/%3E%3C/svg%3E") center/contain no-repeat;
-  pointer-events:none;z-index:0;animation:gearspin 40s linear infinite}
-[data-skin="y2k"] body::after{content:"";position:fixed;bottom:-76px;left:-72px;
+  pointer-events:none}
+[data-skin="y2k"] .gears::after{content:"";position:absolute;bottom:-76px;left:-72px;
   width:230px;height:230px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' fill='rgba(48,66,90,0.14)' d='M99.6 44.1L99.6 55.9L89.1 58.6L85.4 68.5L91.8 77.4L84.2 86.4L74.4 81.7L65.2 87.0L64.5 97.9L52.8 99.9L48.3 90.0L37.9 88.1L30.3 96.0L20.0 90.0L23.0 79.5L16.2 71.4L5.4 72.5L1.3 61.4L10.4 55.3L10.4 44.7L1.3 38.6L5.4 27.5L16.2 28.6L23.0 20.5L20.0 10.0L30.3 4.0L37.9 11.9L48.3 10.0L52.8 0.1L64.5 2.1L65.2 13.0L74.4 18.3L84.2 13.6L91.8 22.6L85.4 31.5L89.1 41.4Z M50 34A16 16 0 1 0 50 66 A16 16 0 1 0 50 34Z'/%3E%3C/svg%3E") center/contain no-repeat;
-  pointer-events:none;z-index:0;animation:gearspin 28s linear infinite reverse}
+  pointer-events:none}
 @keyframes gearspin{to{transform:rotate(360deg)}}
+/* 只有明确宽裕的环境才让它转。手机上宁可不转，也不能拿整屏可见性去赌。 */
+@media (min-width:900px) and (prefers-reduced-motion:no-preference){
+  [data-skin="y2k"] .gears::before{animation:gearspin 40s linear infinite}
+  [data-skin="y2k"] .gears::after{animation:gearspin 28s linear infinite reverse}
+}
 /* 每格右上一颗十字螺丝 */
 [data-skin="y2k"] .bin{position:relative;overflow:hidden}
 [data-skin="y2k"] .bin::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;
@@ -1208,8 +1231,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 [data-skin="term"] .bin[data-k="6"]{border-color:#1B3E28}
 [data-skin="term"] .bin[data-k="6"] .lb{color:#3E6B4E}
 /* 扫描线 —— 极淡，只在深底上才立得住 */
-[data-skin="term"] .wrap::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,rgba(92,255,158,.035) 0 1px,transparent 1px 3px)}
+[data-skin="term"] .gears{background:repeating-linear-gradient(0deg,rgba(92,255,158,.03) 0 1px,transparent 1px 3px)}
 /* 选中态：亮绿反白，是终端里「高亮行」的做法 */
 [data-skin="term"] .c.sel{text-shadow:none}
 [data-skin="term"] .tag.blue,[data-skin="term"] button.act{text-shadow:none}
@@ -1241,6 +1263,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
     <path d="M50 32 L50 90" stroke-width="5"/><path d="M50 32 L34 90 L50 90Z"/></g>
 </defs></svg>
 <div id="bgimg" hidden></div>
+<div class="gears" aria-hidden="true"></div>
 
 <div class="wrap">
 
@@ -1425,7 +1448,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v42";
+const APP_VER = "v43";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -6625,6 +6648,14 @@ function heal(force){
   document.querySelectorAll(".flash").forEach(o => {
     if(!o.classList.contains("in")) o.remove();
   });
+  /* 绘制断了的另一种样子：DOM 全在，但量不到高度 —— iOS 图层预算耗尽时就是这样。
+     这时候重建 innerHTML 没用，得让浏览器重新布局。 */
+  const nav = document.querySelector("nav.bar");
+  if(nav && !stale() && nav.offsetHeight === 0 && document.body.offsetHeight > 0){
+    const wrap = document.querySelector(".wrap");
+    if(wrap){ wrap.style.display = "none"; void wrap.offsetHeight; wrap.style.display = ""; }
+    return;
+  }
   if(!stale()) return;
   try{
     if(phase === "type" && tq.length) typing();
