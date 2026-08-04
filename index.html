@@ -691,8 +691,10 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .flash{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   padding:26px;background:var(--scrim);
   -webkit-backdrop-filter:var(--scrim-blur);backdrop-filter:var(--scrim-blur);
-  opacity:0;transition:opacity .2s}
-.flash.in{opacity:1}
+  opacity:0;transition:opacity .2s;
+  /* 只有 .in 的时候才接触摸 —— 万一它没被收掉，也不会锁死整个屏幕 */
+  pointer-events:none}
+.flash.in{opacity:1;pointer-events:auto}
 .flash .fx{text-align:center;transform:scale(.94);transition:transform .22s}
 .flash.in .fx{transform:scale(1)}
 .flash .fl{font-family:var(--f-num);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
@@ -1423,7 +1425,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v40";
+const APP_VER = "v42";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5787,7 +5789,9 @@ function drawHead(){
   const L = live();
   const d = L.filter(w => w.due <= now()).length;
   $("mDue").textContent = d;
-  $("mFresh").textContent = S.filter(fresh).length;
+  /* 只数参与轮换的。导轨那七格数的是 live()，两边口径必须一样 ——
+     否则会出现「未学 3524、盒1 却只有 154」这种自相矛盾的表头。 */
+  $("mFresh").textContent = live().filter(fresh).length;
   $("mErr").textContent = errToday;
   $("mNext").textContent = (d || !L.length) ? "—" : fmt(Math.min(...L.map(w=>w.due)) - now());
   const b4 = L.filter(w => w.box === EXAM_BOX && w.sent).length;
@@ -6247,7 +6251,15 @@ function loadTxt(files){
     const r = new FileReader();
     r.onload = () => {
       const txt = String(r.result).replace(/\r/g, "").split("\n").map(x => x.trim()).filter(Boolean);
-      const base = file.name.replace(/\.[^.]+$/, "").replace(/^词盒[_\-]?/, "").replace(/[_\-]?带例句$/, "");
+      /* 文件名清理：去扩展名、去「词盒_」前缀、去「_带例句」后缀，
+         再去掉用来排序的数字前缀（01- / 01_ / 01.），单元名才干净。 */
+      const base = file.name
+        .replace(/\.[^.]+$/, "")
+        .replace(/^\s*\d{1,3}\s*[-_.、]\s*/, "")
+        .replace(/^词盒[_\-]?/, "")
+        .replace(/[_\-]?带例句$/, "")
+        .replace(/^(第\s*\d+\s*章)(?=\S)/, "$1 ")
+        .trim() || file.name;
       const u = freshUnit(base);
       const seen = new Set();
       let add = 0, moved = 0, bad = 0;
@@ -6593,17 +6605,36 @@ setInterval(() => {
 
 let savedSkin = "y2k";
 try{ savedSkin = localStorage.getItem(SKIN_KEY) || "y2k"; }catch(e){}
-/* 看门狗：回到前台时，如果本该在配对页却一张牌都没有，说明上一次推进断了 —— 补渲染一次。
-   这条是最后一道防线，正常情况下永远不会触发。 */
-function heal(){
-  if(document.visibilityState !== "visible") return;
-  if(phase !== "match") return;
-  if(document.querySelector(".flash")) return;
+/* 看门狗。
+   上一版有两个洞，而且都是把「病因」当成了免检理由：
+     · phase !== "match" 就返回 —— 可卡死时 phase 正好停在 "type"；
+     · 见到 .flash 就返回 —— 可残留的 .flash 恰恰是卡死的产物。
+   现在改成只看一件事：**屏幕上有没有东西可看**。没有就重建，
+   不管当时自称在哪个阶段、有没有残留的层。 */
+function stale(){
   const b = $("board");
-  if(b && b.querySelector('[data-side="L"]')) return;
-  if(!live().some(x => x.due <= now())) return;
-  try{ render(); }catch(e){}
+  if(!b) return false;
+  if(b.querySelector('[data-side="L"]')) return false;   // 配对页有牌
+  if(b.querySelector(".panel")) return false;            // 拼写关/阶段考/空状态的面板
+  return true;                                           // 什么都没有 = 断了
 }
+function heal(force){
+  if(document.visibilityState !== "visible" && !force) return;
+  /* 先清掉超时还赖着的闪现层。它是 position:fixed 铺满全屏的，
+     留在 DOM 里不光挡视线，还会吃掉所有触摸。 */
+  document.querySelectorAll(".flash").forEach(o => {
+    if(!o.classList.contains("in")) o.remove();
+  });
+  if(!stale()) return;
+  try{
+    if(phase === "type" && tq.length) typing();
+    else if(phase === "exam" && eq.length) examStep();
+    else render();
+  }catch(e){ try{ render(); }catch(_){} }
+}
+/* 定期自检。真机上冻结可能发生在任何时刻，而且不一定伴随可见性变化，
+   所以除了切前台，还要有个心跳。两秒一次，只做一次 DOM 查询，开销可以忽略。 */
+setInterval(() => { if(document.visibilityState === "visible") heal(); }, 2000);
 document.addEventListener("visibilitychange", heal);
 addEventListener("pageshow", heal);
 addEventListener("focus", heal);
