@@ -565,6 +565,13 @@ body{
 
 /* 单词展示区 —— 此刻正在配的那一张，放大摆在卡片区上方 */
 .hero{position:relative;overflow:hidden;--hero-h:53px;--hero-fs:46px}
+.hero .w button.say{position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;padding:0;border:none;background:none;box-shadow:none;border-radius:var(--r);
+  color:var(--mute);opacity:.75;cursor:pointer}
+.hero .w button.say:hover{opacity:1;color:var(--acc)}
+.hero .w button.say svg{width:100%;height:100%;fill:currentColor;stroke:currentColor}
+.hero.idle .w button.say{display:none}
+.hero .w span{padding-right:38px}
 .hero .w{background:var(--well);border:var(--bw) solid var(--edge);border-radius:var(--r);
   padding:12px 13px 18px;margin-top:9px;position:relative;box-shadow:var(--sh-well)}
 /* 词格高度写死。光管「空 vs 有字」不够 —— 长词折行照样把框撑高一倍，
@@ -579,6 +586,13 @@ body{
 
 /* 单词展示区 —— 你此刻正在配的那一张，放大摆在卡片区上方 */
 .hero{position:relative;overflow:hidden;--hero-h:53px;--hero-fs:46px}
+.hero .w button.say{position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;padding:0;border:none;background:none;box-shadow:none;border-radius:var(--r);
+  color:var(--mute);opacity:.75;cursor:pointer}
+.hero .w button.say:hover{opacity:1;color:var(--acc)}
+.hero .w button.say svg{width:100%;height:100%;fill:currentColor;stroke:currentColor}
+.hero.idle .w button.say{display:none}
+.hero .w span{padding-right:38px}
 .hero .w{background:var(--well);border:var(--bw) solid var(--edge);border-radius:var(--r);
   padding:12px 13px 18px;margin-top:9px;position:relative;box-shadow:var(--sh-well)}
 /* 词格高度写死。光管「空 vs 有字」不够 —— 长词折行照样把框撑高一倍，
@@ -791,112 +805,270 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 
 
 /* ══════════════════ 远征 —— 独立于皮肤 ══════════════════
-   自带一套固定配色，不走令牌。理由：远征是只读的，你不在上面做任何操作；
+   自带一套固定配色，不走令牌。远征是只读的，你不在上面做任何操作；
    皮肤是给要点几百次的控件用的，拿工作台的语言画地图两边都别扭。
-   做成深色是因为夜里 —— 用终端皮在被窝里背单词的人，点进亮界面会被闪到；
-   反过来白天用亮皮的人点进来只是气氛切换。 */
-#dTrek{--mp:#0D151F;--rf:#1B2A3B;--tk:#CBD9E7;--dm:#5E7488;--ft:#37485B;
-  --gd:#E8B14A;--gdd:#8A6620;--td:#FFE9B0;--ah:#26374A;--wn:#D66A4E;--dn:#63B08A;
+
+   三屏怎么统一：同一本日志，白天画图、夜里宿营。
+   本章其实就是地图放大之后的一段 —— 两屏用同一张羊皮、同一套制图符号，
+   只差比例尺。宿营翻到夜色那一页。
+   绑住三者的是：四角黄铜件、同一套字、同一套语义色逻辑
+   （朱砂↔琥珀 报警，赭石↔奶金 焦点，青绿↔苔绿 完成 —— 换了底色，职务不变）。 */
+#dTrek{
   --tf:"Helvetica Neue",Helvetica,"PingFang SC","Microsoft YaHei",sans-serif;
+  --ts:Georgia,"Songti SC","STSong",serif;
   --tm:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  background:var(--mp);border:1px solid var(--rf);border-radius:4px;color:var(--tk);
-  box-shadow:0 18px 50px rgba(0,0,0,.6);-webkit-backdrop-filter:none;backdrop-filter:none;
-  max-width:560px;padding:0;font-family:var(--tf)}
-#dTrek::backdrop{background:rgba(4,8,13,.86)}
-.trek{max-height:84vh;overflow:auto;
+  border-radius:3px;padding:0;max-width:560px;font-family:var(--tf);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  background:var(--mp);color:var(--tk);border:1px solid var(--rf);
+  box-shadow:0 18px 54px rgba(0,0,0,.5)}
+/* 羊皮页：本章 · 地图 */
+#dTrek[data-mode="paper"]{
+  --mp:#E7D9B8;--pg2:#D8C69C;--rf:#C0AA80;--tk:#3A2E1C;--dm:#82704F;--ft:#A08B62;
+  --br:#8E6F2C;--ink:#3A2E1C;
+  --acc1:#9B3A28;--acc2:#C2841F;--ok:#1F5E63;--bad:#9B3A28;--line:#BCA57C;
+  --panel:rgba(255,250,238,.4);--inset:rgba(120,96,58,.1);
+  /* 磨砂玻璃：半透明面 + 背后模糊 + 上缘一线高光 + 柔和落影 */
+  --gl:rgba(255,251,241,.46);--gl-e:rgba(255,253,246,.72);
+  --gl-hi:rgba(255,255,255,.7);--gl-sh:rgba(110,78,34,.16);--gl-in:rgba(120,96,58,.07);
+  --fig:url(#kfigP);--fig-sh:rgba(74,44,20,.4);--glow:194,132,31}
+/* 夜色页：宿营 */
+#dTrek[data-mode="night"]{
+  --mp:#0E141C;--pg2:#0A1119;--rf:#232F3E;--tk:#D3DCE6;--dm:#6C7F93;--ft:#41505F;
+  --br:#C9A24A;--ink:#D3DCE6;
+  /* 宿营只留两个色系：暖 = 今天挣到的，冷 = 今天丢掉的。
+     绿和红都撤掉 —— 四组颜色挤在一屏里，谁也不突出。 */
+  --acc1:#E8B14A;--acc2:#FFE0A0;--ok:#FFD98A;--bad:#7FA3C4;--line:#2A3948;
+  --panel:rgba(20,32,46,.5);--inset:rgba(255,255,255,.03);
+  --gl:rgba(26,40,58,.46);--gl-e:rgba(150,182,216,.2);
+  --gl-hi:rgba(255,255,255,.09);--gl-sh:rgba(0,0,0,.42);--gl-in:rgba(255,255,255,.03);
+  --fig:url(#kfigN);--fig-sh:rgba(0,0,0,.5);--glow:232,177,74}
+#dTrek::backdrop{background:rgba(4,8,13,.88)}
+
+#dTrek{position:relative;overflow:hidden}
+/* 星空是整块面板的底，不是插图框里的东西。挂在 dialog 上，
+   内容滚动时天不跟着走 —— 天本来就不会跟着你走。 */
+.ksky2{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .25s}
+#dTrek[data-mode="night"] .ksky2{opacity:1}
+.ksky2 svg{width:100%;height:100%;display:block}
+.ksky2 .kbgst circle{fill:#9FBDD8}
+.ksky2 .kln line{stroke:#7FA6C8;stroke-opacity:.24;stroke-width:.28;vector-effect:non-scaling-stroke}
+.ksky2 .kct circle{fill:#E4F0FA}
+.trek{max-height:84vh;overflow:auto;position:relative;z-index:1}
+/* 羊皮的纸面。规则的 repeating-gradient 一定会显出栅格，所以纹理全部改用
+   feTurbulence 噪声 —— 那才是纸张纤维该有的随机。上面再叠岁月的痕迹：
+   霉斑、水渍、一道折痕、四边的焦黄。 */
+#dTrek[data-mode="paper"] .trek{
   background-image:
-    repeating-linear-gradient(0deg,rgba(120,160,200,.05) 0 1px,transparent 1px 40px),
-    repeating-linear-gradient(90deg,rgba(120,160,200,.05) 0 1px,transparent 1px 40px),
-    radial-gradient(ellipse 90% 40% at 50% 0%,rgba(70,110,155,.15),transparent 65%)}
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='220'%20height='220'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='4'%20seed='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3C/filter%3E%3Crect%20width='220'%20height='220'%20filter='url%28%23n%29'%20opacity='0.5'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='220'%20height='220'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.035'%20numOctaves='3'%20seed='7'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3C/filter%3E%3Crect%20width='220'%20height='220'%20filter='url%28%23n%29'%20opacity='0.55'/%3E%3C/svg%3E"),
+    /* 霉斑 —— 位置和大小都不成规律 */
+    radial-gradient(ellipse 9% 5% at 17% 9%,rgba(126,86,34,.2),transparent 70%),
+    radial-gradient(ellipse 5% 3% at 23% 12%,rgba(126,86,34,.16),transparent 70%),
+    radial-gradient(ellipse 7% 4% at 79% 31%,rgba(126,86,34,.18),transparent 70%),
+    radial-gradient(ellipse 12% 6% at 88% 63%,rgba(140,98,42,.14),transparent 72%),
+    radial-gradient(ellipse 6% 3% at 34% 71%,rgba(126,86,34,.15),transparent 70%),
+    radial-gradient(ellipse 10% 5% at 9% 86%,rgba(140,98,42,.13),transparent 72%),
+    /* 水渍：边缘深、中间浅，是干涸后留下的圈 */
+    radial-gradient(ellipse 26% 15% at 66% 18%,transparent 58%,rgba(132,92,40,.13) 76%,transparent 88%),
+    radial-gradient(ellipse 20% 12% at 27% 52%,transparent 56%,rgba(132,92,40,.11) 78%,transparent 90%),
+    /* 一道竖折痕 */
+    linear-gradient(90deg,transparent 61.4%,rgba(112,78,34,.09) 62%,rgba(255,250,236,.16) 62.6%,transparent 63.4%),
+    /* 大范围明暗不匀 */
+    radial-gradient(ellipse 70% 44% at 24% 22%,rgba(255,250,232,.3),transparent 72%),
+    radial-gradient(ellipse 60% 40% at 82% 78%,rgba(150,110,52,.1),transparent 74%),
+    /* 四边焦黄 */
+    radial-gradient(ellipse 128% 106% at 50% 50%,transparent 54%,rgba(104,70,28,.3) 100%);
+  background-size:220px 220px,540px 540px,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto;
+  background-blend-mode:multiply,multiply,normal,normal,normal,normal,normal,normal,normal,normal,normal,normal,normal,normal}
+#dTrek[data-mode="night"] .trek{
+  background-image:
+    radial-gradient(ellipse 80% 34% at 70% 6%,rgba(84,124,172,.16),transparent 70%),
+    radial-gradient(ellipse 70% 40% at 20% 78%,rgba(46,74,110,.2),transparent 74%)}
+
 .tkbar{position:sticky;top:0;z-index:9;display:flex;align-items:stretch;
-  background:rgba(11,18,27,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--rf)}
+  background:var(--mp);border-bottom:1px solid var(--rf)}
+#dTrek[data-mode="paper"] .tkbar{background:rgba(224,212,182,.96);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#dTrek[data-mode="night"] .tkbar{background:rgba(12,18,26,.97);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .tkbar button{flex:1;padding:14px 4px 12px;background:none;border:none;border-bottom:2px solid transparent;
   color:var(--dm);font:700 12px/1 var(--tf);letter-spacing:.14em;cursor:pointer;
   text-transform:none;border-radius:0;box-shadow:none}
-.tkbar button.on{color:var(--gd);border-bottom-color:var(--gd)}
-.tkbar button.x{flex:none;padding:14px 16px 12px;color:var(--dm);letter-spacing:.06em;
+.tkbar button.on{color:var(--acc1);border-bottom-color:var(--acc1)}
+.tkbar button.kx{flex:none;padding:14px 16px 12px;color:var(--dm);letter-spacing:.06em;
   border-left:1px solid var(--rf)}
 .tkin{padding:0 16px 30px}
-.tkh{padding:20px 2px 14px;border-bottom:1px solid var(--rf);position:relative}
+.tkh{padding:20px 2px 14px;position:relative;border-bottom:1px solid var(--rf)}
+.tkh::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;
+  background:var(--rf);opacity:.5}
 .tkk{font:700 9.5px/1 var(--tm);letter-spacing:.3em;color:var(--dm);text-transform:uppercase}
-.tkt{font:800 22px/1.2 var(--tf);letter-spacing:.04em;margin:9px 0 8px;color:var(--tk)}
+.tkt{font:700 23px/1.2 var(--ts);letter-spacing:.05em;margin:10px 0 8px;color:var(--tk)}
 .tkl{font-size:12.5px;line-height:1.75;color:var(--dm)}
 .tkl b{color:var(--tk);font-weight:600}
 .tkc{position:absolute;top:22px;right:2px;font:700 9px/1.7 var(--tm);letter-spacing:.16em;
   color:var(--ft);text-align:right}
-/* 本章 */
-.leg{position:relative;height:212px;margin:15px 0 4px;border:1px solid var(--rf);border-radius:3px;
-  background:linear-gradient(180deg,#0B1420,#101C29);overflow:hidden}
-.leg .rg{position:absolute;left:0;right:0;bottom:52px;height:96px;opacity:.5}
-.leg .rd{position:absolute;left:5%;right:5%;bottom:46px;height:2px;background:var(--ah)}
-.leg .rdd{position:absolute;left:5%;bottom:46px;height:3px;background:var(--gd);border-radius:2px}
-.leg .rdt{position:absolute;bottom:46px;height:3px;background:var(--td);border-radius:2px;
-  box-shadow:0 0 10px rgba(255,233,176,.7)}
-.leg .ps{position:absolute;bottom:44px;width:1.5px;height:11px;background:var(--ah);transform:translateX(-50%)}
-.leg .ps.pa{background:var(--gdd);height:14px}
-.leg .pl{position:absolute;bottom:22px;transform:translateX(-50%);text-align:center;white-space:nowrap}
-.leg .pl .s{font:700 8.5px/1 var(--tm);letter-spacing:.06em;color:var(--ft)}
-.leg .pl .n{font:700 12px/1 var(--tm);color:var(--dm);margin-top:4px}
-.leg .pl.pa .n{color:var(--gd)} .leg .pl.gd .n{color:var(--dn)} .leg .pl.er .n{color:var(--wn)}
-.leg .wk{position:absolute;bottom:46px;width:36px;height:44px;transform:translateX(-50%);
-  filter:drop-shadow(0 0 10px rgba(232,177,74,.5));transition:left .6s}
-.leg .wk svg{width:100%;height:100%;display:block}
-.gn{position:absolute;top:13px;left:0;right:0;text-align:center}
-.gn .a{font:700 9.5px/1 var(--tm);letter-spacing:.24em;color:var(--ft);text-transform:uppercase}
-.gn .b{font:800 30px/1 var(--tm);color:var(--td);margin-top:9px}
-.gn .b.zero{color:var(--ft)}
-.gn .c{font:600 11.5px/1 var(--tf);color:var(--dm);margin-top:8px}
-.tkq{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px}
-.tkq div{padding:11px 4px;text-align:center;border:1px solid var(--rf);border-radius:3px}
-.tkq .k{font:700 9px/1 var(--tm);letter-spacing:.14em;color:var(--ft);text-transform:uppercase}
-.tkq .v{font:700 19px/1 var(--tm);margin-top:7px;color:var(--tk)}
-.tkq .a .v{color:var(--gd)} .tkq .b .v{color:var(--dn)} .tkq .c .v{color:var(--wn)}
-.tkq .d .v{color:var(--dm)}
-/* 地图 */
-.atl{position:relative;margin:14px 0 0}
-.atl svg.rl,.atl svg.rt{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.atl .nd{position:absolute;transform:translate(-50%,-50%);pointer-events:none}
-.atl .dt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;
-  border-radius:50%;background:var(--mp);border:2px solid var(--ah);box-shadow:0 0 0 4px var(--mp)}
-.atl .nd.w .dt{border-color:var(--gd)}
-.atl .nd.h .dt{width:16px;height:16px;border-color:var(--gd);
-  box-shadow:0 0 0 4px var(--mp),0 0 14px rgba(232,177,74,.7)}
-.atl .nd.f .dt{background:var(--gd);border-color:var(--gd)}
-.atl .cd{position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap}
-.atl .cd.L{right:50%;margin-right:19px;text-align:right} .atl .cd.R{left:50%;margin-left:19px}
-.atl .no{font:700 9.5px/1 var(--tm);letter-spacing:.18em;color:var(--ft)}
-.atl .nm{font:600 13px/1.35 var(--tf);color:var(--dm);margin-top:3px}
-.atl .nd.w .nm,.atl .nd.h .nm{color:var(--tk)}
-.atl .pc{font:700 11px/1 var(--tm);color:var(--ft);margin-top:3px}
-.atl .nd.w .pc,.atl .nd.h .pc{color:var(--gd)}
-.atl .nd.off .nm{opacity:.55}
-/* 宿营 */
-.cmp{position:relative;height:172px;border:1px solid var(--rf);border-radius:3px;
-  background:linear-gradient(180deg,#0B1420,#12202E);overflow:hidden;margin:15px 0 14px;
-  display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px;gap:10px}
-.cmp .cr{position:absolute;left:0;right:0;bottom:0;height:84px;opacity:.55}
-.cmp i{position:absolute;width:2px;height:2px;border-radius:50%;background:#9FB8D0;opacity:.5}
-.cmp .fr{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:116px;height:116px;
-  border-radius:50%;background:radial-gradient(circle,rgba(232,177,74,.26),transparent 68%)}
-.cmp svg{position:relative;z-index:2}
-.tkr{border:1px solid var(--rf);border-radius:3px;overflow:hidden}
-.tkr .r{display:flex;justify-content:space-between;align-items:baseline;padding:13px 15px;
-  border-bottom:1px solid var(--rf);font-size:13.5px}
-.tkr .r:last-child{border-bottom:none}
-.tkr .r span:last-child{font:700 17px/1 var(--tm)}
-.tkr .up span:last-child{color:var(--gd)} .tkr .gd span:last-child{color:var(--dn)}
-.tkr .er span:last-child{color:var(--wn)}
-.tkr .mu{color:var(--dm)} .tkr .mu span:last-child{color:var(--dm);font-size:14px}
+
+/* 黄铜角件 —— 三屏共用，把它们绑成一本册子的那一笔 */
+.kbrass{position:absolute;width:14px;height:14px;pointer-events:none;z-index:5;
+  border-color:var(--br);border-style:solid;opacity:.62}
+.kb1{left:6px;top:6px;border-width:1px 0 0 1px}
+.kb2{right:6px;top:6px;border-width:1px 1px 0 0}
+.kb3{left:6px;bottom:6px;border-width:0 0 1px 1px}
+.kb4{right:6px;bottom:6px;border-width:0 1px 1px 0}
+/* 图幅：页面上嵌进去的那一块，靠内阴影和描边和纸面分开 */
+/* 磨砂玻璃 —— 背后的纸纹/夜色会透过来并被模糊，所以它像一块压在页面上的玻璃板 */
+.kpaper,.kgn,.kdist,.tkr,.kcmp{
+  -webkit-backdrop-filter:blur(13px) saturate(1.25);backdrop-filter:blur(13px) saturate(1.25);
+  box-shadow:inset 0 1px 0 var(--gl-hi),inset 0 0 26px var(--gl-in),0 6px 20px var(--gl-sh)}
+.kpaper{position:relative;border:1px solid var(--gl-e);border-radius:5px;overflow:hidden;
+  background:var(--gl)}
+
+/* ── 本章 ── */
+.kgn{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;margin-top:15px;
+  border:1px solid var(--gl-e);border-radius:5px;overflow:hidden;background:var(--gl)}
+.kgn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc1)}
+.kgn .ka{font:700 9.5px/1.5 var(--tm);letter-spacing:.2em;color:var(--ft);text-transform:uppercase;flex:none}
+.kgn .kb{font:800 32px/1 var(--tm);color:var(--acc2);letter-spacing:-.02em}
+#dTrek[data-mode="night"] .kgn .kb{text-shadow:0 0 18px rgba(255,233,176,.3)}
+.kgn .kb.kzero{color:var(--ft);text-shadow:none}
+.kgn .kc{font:600 11.5px/1.65 var(--tf);color:var(--dm);margin-left:auto;text-align:right}
+.kgn .kc em{font-style:normal;font-family:var(--tm);color:var(--acc1);font-weight:700}
+
+.kleg{position:relative;height:184px;margin:11px 0 4px}
+.kleg .ksky,.kleg .kstar{display:none}
+/* 等高线：制图上真正表示地形的东西，比画一排山尖准确 */
+.kleg .krg{position:absolute;left:0;right:0;bottom:44px;height:112px}
+.kleg .krg path{fill:none;stroke:var(--line);vector-effect:non-scaling-stroke}
+.kleg .krg .kf{stroke-opacity:.4;stroke-width:1}
+.kleg .krg .km{stroke-opacity:.6;stroke-width:1}
+.kleg .krg .kn2{stroke-opacity:.85;stroke-width:1.2;fill:var(--inset)}
+/* 原来这里是一层 30px 的网格，栅栏感就是它来的。换成一道横向的淡墨渐层，
+   只用来把地面和天分开。 */
+.kleg .kgrid{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 52%,var(--inset) 100%)}
+.kleg .kcase{position:absolute;left:6%;right:6%;bottom:41px;height:5px;border-radius:3px;
+  background:var(--inset)}
+.kleg .krd{position:absolute;left:6%;right:6%;bottom:43px;height:1.5px;
+  background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px)}
+.kleg .krdd{position:absolute;left:6%;bottom:42px;height:3px;background:var(--acc1);border-radius:2px;
+  box-shadow:0 0 7px rgba(var(--glow),.32)}
+/* 磷光：今天走的那一段自己发光。核心饱和、外面两圈晕开 ——
+   哪怕只有几个像素宽，你也一眼找得到它。 */
+.kleg .krdt{position:absolute;bottom:40px;height:6px;background:var(--acc2);border-radius:3px;
+  box-shadow:0 0 8px 1px rgba(var(--glow),.75),0 0 18px 5px rgba(var(--glow),.38),
+             0 0 34px 10px rgba(var(--glow),.16);
+  animation:kpulse 2.8s ease-in-out infinite}
+@keyframes kpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}
+.kleg .kps{position:absolute;bottom:41px;width:1.5px;height:8px;background:var(--line);transform:translateX(-50%)}
+.kleg .kps.kpa{background:var(--acc1);height:12px;box-shadow:0 0 6px rgba(var(--glow),.5)}
+/* 沿路的磷火点 —— 走过的路上零星几点余光 */
+.kleg .kfx{position:absolute;bottom:43px;width:3px;height:3px;border-radius:50%;
+  background:var(--acc2);transform:translateX(-50%);
+  box-shadow:0 0 6px 1px rgba(var(--glow),.7);animation:kfloat 3.6s ease-in-out infinite}
+@keyframes kfloat{0%,100%{opacity:.35;transform:translateX(-50%) translateY(0)}
+  50%{opacity:.9;transform:translateX(-50%) translateY(-5px)}}
+.kleg .kpl{position:absolute;bottom:11px;transform:translateX(-50%);text-align:center;white-space:nowrap}
+.kleg .kpl.kfirst{transform:none;text-align:left}
+.kleg .kpl.klast{transform:translateX(-100%);text-align:right}
+.kleg .kpl .ks{font:600 8.5px/1 var(--tf);letter-spacing:.02em;color:var(--dm)}
+.kleg .kpl .kn{font:700 13px/1 var(--tm);color:var(--tk);margin-top:5px}
+.kleg .kpl.kpa .kn{color:var(--acc1)} .kleg .kpl.kgd .kn{color:var(--ok)}
+.kleg .kpl.ker .kn{color:var(--bad)}
+.kleg .kwk{position:absolute;bottom:43px;width:33px;height:40px;transform:translateX(-50%);
+  transition:left .6s;z-index:3;filter:drop-shadow(0 0 7px rgba(var(--glow),.45))}
+.kleg .kwk svg{width:100%;height:100%;display:block}
+.kleg .kwk::after{content:"";position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
+  width:20px;height:3px;border-radius:50%;background:var(--inset);filter:blur(1.5px)}
+
+/* 分布条：四个一模一样的方框换成一条按比例分段的带子 */
+.kdist{display:flex;height:11px;border-radius:6px;overflow:hidden;margin-top:13px;
+  border:1px solid var(--gl-e);background:var(--gl)}
+.kdist i{display:block;height:100%}
+.kdist .kseg1{background:repeating-linear-gradient(45deg,var(--line) 0 2px,transparent 2px 5px)}
+.kdist .kseg2{background:var(--acc2)} .kdist .kseg3{background:var(--ok)} .kdist .kseg4{background:var(--bad)}
+.kleg2{display:flex;flex-wrap:wrap;gap:9px 18px;margin-top:11px}
+.kleg2 div{display:flex;align-items:baseline;gap:7px;font:600 11.5px var(--tf);color:var(--dm)}
+.kleg2 i{width:8px;height:8px;border-radius:1px;flex:none;position:relative;top:1px;
+  border:1px solid var(--rf)}
+.kleg2 b{font:700 14px var(--tm);color:var(--tk)}
+
+/* ── 地图：同一张纸，只差比例尺 ── */
+.katl{position:relative;margin:14px 0 0}
+.katl svg.krl,.katl svg.krt{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.katl .knd{position:absolute;transform:translate(-50%,-50%);pointer-events:none;z-index:3}
+.katl .kdt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;
+  border-radius:50%;background:var(--mp);border:1.6px solid var(--line);
+  box-shadow:0 0 0 3px var(--mp)}
+.katl .knd.kw .kdt{border-color:var(--acc1)}
+.katl .knd.kh .kdt{width:15px;height:15px;border-color:var(--acc1);
+  box-shadow:0 0 0 3px var(--mp),0 0 0 5px color-mix(in srgb,var(--acc1) 24%,transparent)}
+.katl .knd.kh .kdt::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:var(--acc1)}
+.katl .knd.kf .kdt{background:var(--acc1);border-color:var(--acc1)}
+.katl .kcd{position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap}
+.katl .kcd.kL{right:50%;margin-right:19px;text-align:right} .katl .kcd.kR{left:50%;margin-left:19px}
+.katl .kno{font:700 9px/1 var(--tm);letter-spacing:.2em;color:var(--ft)}
+.katl .knm{font:600 13px/1.35 var(--ts);color:var(--dm);margin-top:3px}
+.katl .knd.kw .knm,.katl .knd.kh .knm{color:var(--tk)}
+.katl .kpc{font:700 11px/1 var(--tm);color:var(--ft);margin-top:3px}
+.katl .knd.kw .kpc,.katl .knd.kh .kpc{color:var(--acc1)}
+.katl .knd.koff .knm{opacity:.55}
+.katl .knd.koff .kpc::after{content:" 停用";font-family:var(--tf);font-size:9.5px;color:var(--ft)}
+.katl .krose{position:absolute;right:15px;top:17px;width:46px;height:46px;opacity:.45;z-index:2;
+  pointer-events:none}
+.katl .krose svg{width:100%;height:100%;fill:none;stroke:var(--tk);stroke-width:1}
+.katl .krose text{fill:var(--tk);font:700 8px var(--ts);stroke:none}
+
+/* ── 宿营：翻到夜色那一页 ── */
+.kcmp{position:relative;height:206px;border:1px solid var(--gl-e);border-radius:5px;overflow:hidden;
+  margin:15px 0 14px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:26px;gap:12px;
+  background:linear-gradient(180deg,rgba(6,11,18,.24) 0%,rgba(9,17,27,.42) 44%,
+    rgba(13,25,38,.72) 72%,rgba(10,18,28,.9) 100%)}
+.kcmp i{position:absolute;border-radius:50%;background:#8FB0D0}
+/* 星座：点加连线，用真实星座的骨架。随机撒点看着像噪点，连起来才是夜空 */
+.kcmp .kcons{position:absolute;left:0;right:0;top:0;height:66%;pointer-events:none;z-index:1}
+.kcmp .kcons .kln line{stroke:#6E93B8;stroke-opacity:.3;stroke-width:.35;
+  vector-effect:non-scaling-stroke}
+.kcmp .kcons .kdotc circle{fill:#C6DCF0;opacity:.72}
+.kcmp .kcons .kdotc circle:nth-child(3n){opacity:.95}
+.kcmp .kmoon{position:absolute;right:36px;top:26px;width:26px;height:26px;border-radius:50%;z-index:2;
+  background:radial-gradient(circle at 34% 32%,#F2F7FC,#B9CDE0 62%,#8FA9C2);
+  box-shadow:0 0 30px rgba(190,214,238,.38),inset -3px -3px 7px rgba(90,120,150,.4)}
+.kcmp .kcr{position:absolute;left:0;right:0;bottom:0;height:122px}
+.kcmp .kcr .kf{fill:#101C2A;stroke:none} .kcmp .kcr .km{fill:#152537;stroke:none}
+.kcmp .kcr .kn2{fill:#1A2E43;stroke:none}
+.kcmp .kfr{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:154px;height:154px;
+  border-radius:50%;background:radial-gradient(circle,rgba(232,177,74,.3),transparent 66%);
+  animation:kflick 3.4s ease-in-out infinite}
+@keyframes kflick{0%,100%{opacity:.8;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
+.kcmp .kart{position:relative;z-index:2;display:block}
+.kcmp .kart svg{width:100%;height:100%;display:block}
+.kcmp .kground{position:absolute;left:0;right:0;bottom:0;height:26px;
+  background:linear-gradient(180deg,rgba(26,46,67,.92),#09121B)}
+.tkr{border:1px solid var(--gl-e);border-radius:5px;overflow:hidden;background:var(--gl)}
+.tkr .kr{display:flex;justify-content:space-between;align-items:baseline;padding:13px 15px;
+  border-bottom:1px solid var(--rf);font-size:13.5px;position:relative}
+.tkr .kr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
+.tkr .kr.kup::before{background:var(--acc1)} .tkr .kr.kgd::before{background:var(--ok)}
+.tkr .kr.ker::before{background:var(--bad)}
+.tkr .kr:last-child{border-bottom:none}
+.tkr .kr span:last-child{font:700 17px/1 var(--tm)}
+.tkr .kup span:last-child{color:var(--acc1)} .tkr .kgd span:last-child{color:var(--ok)}
+.tkr .ker span:last-child{color:var(--bad)}
+.tkr .kmu{color:var(--dm)} .tkr .kmu span:last-child{color:var(--dm);font-size:14px}
 .tkf{margin-top:14px;font-size:12.5px;line-height:1.85;color:var(--dm);
-  border-left:2px solid var(--gdd);padding-left:13px}
+  border-left:2px solid var(--br);padding-left:13px}
 .tkf b{color:var(--tk);font-weight:600}
+.tkn{margin-top:22px;padding-top:14px;border-top:1px solid var(--rf);
+  font-size:11.5px;line-height:1.85;color:var(--ft)}
+.tkn b{color:var(--dm)}
 @media (max-width:640px){
   #dTrek{width:calc(100% - 20px)}
   .tkin{padding:0 13px 26px}
-  .leg{height:196px}
-  .leg .pl .s{font-size:7.5px} .leg .pl .n{font-size:11px}
-  .atl .nm{font-size:12px}
+  .kleg{height:160px}
+  .kleg .kpl .ks{font-size:8px} .kleg .kpl .kn{font-size:12px}
+  .katl .knm{font-size:12px}
+  .kgn{gap:10px;padding:13px 14px} .kgn .kb{font-size:27px}
 }
 
 /* ══════════════════ 装饰补丁 —— 令牌表达不了的部分 ══════════════════ */
@@ -1010,6 +1182,14 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="kfigP" x1="0" y1="0" x2=".35" y2="1">
+    <stop offset="0" stop-color="#C9573A"/><stop offset=".55" stop-color="#9B3A28"/>
+    <stop offset="1" stop-color="#6E2417"/></linearGradient>
+  <linearGradient id="kfigN" x1="0" y1="0" x2=".35" y2="1">
+    <stop offset="0" stop-color="#FFE6AC"/><stop offset=".5" stop-color="#E8B14A"/>
+    <stop offset="1" stop-color="#A9741C"/></linearGradient>
+  <linearGradient id="kroseG" x1="0" y1="0" x2=".4" y2="1">
+    <stop offset="0" stop-color="#6B5636"/><stop offset="1" stop-color="#3A2E1C"/></linearGradient>
   <g id="tkWalk"><circle cx="50" cy="15" r="11"/>
     <path d="M50 27 L47 57" stroke-width="9" stroke-linecap="round" fill="none"/>
     <path d="M47 36 L28 47" stroke-width="8" stroke-linecap="round" fill="none"/>
@@ -1045,7 +1225,10 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 
   <div class="hero shell" id="hero" hidden>
     <div class="eb" id="heroK">正在配对</div>
-    <div class="w" id="heroW"><span></span></div>
+    <div class="w" id="heroW"><span></span><button id="bSay" class="say" title="再听一遍（长按放慢）" aria-label="朗读">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.6L12 5.6v12.8L7.6 14.5H4Z"/>
+      <path d="M15.2 8.6a4.6 4.6 0 0 1 0 6.8" fill="none" stroke-width="1.9" stroke-linecap="round"/>
+      <path d="M17.7 6a8 8 0 0 1 0 12" fill="none" stroke-width="1.9" stroke-linecap="round"/></svg></button>
   </div>
 
   <main id="board"></main>
@@ -1056,6 +1239,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
     <button id="bBank" class="g">词库</button>
     <button id="bList" class="g">清单</button>
     <button id="bSync" class="g">备份</button>
+    <button id="bVoice" class="g">朗读 开</button>
     <button id="bTrek" class="g">远征</button>
     <button id="bSkin" class="g">外观</button>
     <span class="sp"></span>
@@ -1091,12 +1275,13 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 </div></dialog>
 
 <dialog id="dTrek">
+  <div class="ksky2" aria-hidden="true"><svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid slice"><g class="kbgst"><circle cx="45.4" cy="83.0" r="0.6" opacity="0.27"/><circle cx="84.1" cy="30.2" r="0.75" opacity="0.27"/><circle cx="60.9" cy="29.6" r="0.6" opacity="0.22"/><circle cx="10.7" cy="118.8" r="0.35" opacity="0.31"/><circle cx="40.0" cy="67.8" r="0.75" opacity="0.32"/><circle cx="61.8" cy="121.9" r="0.35" opacity="0.16"/><circle cx="20.3" cy="37.6" r="0.35" opacity="0.36"/><circle cx="33.3" cy="87.5" r="0.4" opacity="0.29"/><circle cx="63.5" cy="74.5" r="0.35" opacity="0.27"/><circle cx="28.7" cy="145.7" r="0.35" opacity="0.34"/><circle cx="32.3" cy="35.8" r="0.5" opacity="0.15"/><circle cx="56.1" cy="18.4" r="0.35" opacity="0.38"/><circle cx="39.1" cy="140.0" r="0.35" opacity="0.2"/><circle cx="91.0" cy="10.5" r="0.6" opacity="0.41"/><circle cx="40.2" cy="13.4" r="0.4" opacity="0.36"/><circle cx="27.9" cy="15.5" r="0.5" opacity="0.14"/><circle cx="41.4" cy="135.0" r="0.4" opacity="0.21"/><circle cx="11.7" cy="11.6" r="0.6" opacity="0.19"/><circle cx="55.7" cy="67.0" r="0.4" opacity="0.42"/><circle cx="75.9" cy="62.9" r="0.6" opacity="0.17"/><circle cx="42.4" cy="33.4" r="0.5" opacity="0.38"/><circle cx="95.6" cy="87.8" r="0.35" opacity="0.2"/><circle cx="39.9" cy="125.2" r="0.75" opacity="0.17"/><circle cx="97.0" cy="33.5" r="0.5" opacity="0.14"/><circle cx="60.6" cy="121.7" r="0.6" opacity="0.16"/><circle cx="10.7" cy="86.3" r="0.4" opacity="0.14"/><circle cx="37.4" cy="92.0" r="0.4" opacity="0.41"/><circle cx="48.4" cy="85.2" r="0.6" opacity="0.19"/><circle cx="16.8" cy="132.9" r="0.75" opacity="0.21"/><circle cx="20.2" cy="108.7" r="0.75" opacity="0.2"/><circle cx="93.2" cy="129.2" r="0.75" opacity="0.16"/><circle cx="6.6" cy="18.6" r="0.75" opacity="0.41"/><circle cx="24.9" cy="103.8" r="0.5" opacity="0.26"/><circle cx="88.9" cy="73.2" r="0.75" opacity="0.19"/><circle cx="71.2" cy="12.8" r="0.4" opacity="0.27"/><circle cx="64.7" cy="91.1" r="0.35" opacity="0.22"/><circle cx="90.1" cy="32.2" r="0.35" opacity="0.16"/><circle cx="41.5" cy="38.6" r="0.35" opacity="0.19"/><circle cx="37.4" cy="84.8" r="0.4" opacity="0.17"/><circle cx="15.3" cy="67.4" r="0.5" opacity="0.32"/><circle cx="68.4" cy="86.6" r="0.4" opacity="0.31"/><circle cx="90.7" cy="70.9" r="0.5" opacity="0.34"/><circle cx="94.4" cy="6.0" r="0.35" opacity="0.28"/><circle cx="72.1" cy="48.6" r="0.35" opacity="0.16"/><circle cx="54.4" cy="108.4" r="0.4" opacity="0.36"/><circle cx="89.8" cy="53.3" r="0.6" opacity="0.39"/><circle cx="85.6" cy="62.7" r="0.35" opacity="0.38"/><circle cx="57.0" cy="92.4" r="0.6" opacity="0.25"/><circle cx="3.2" cy="13.3" r="0.35" opacity="0.32"/><circle cx="97.4" cy="128.8" r="0.5" opacity="0.25"/><circle cx="72.6" cy="86.1" r="0.6" opacity="0.27"/><circle cx="54.0" cy="77.2" r="0.75" opacity="0.15"/><circle cx="59.7" cy="71.8" r="0.4" opacity="0.41"/><circle cx="12.8" cy="114.5" r="0.6" opacity="0.21"/><circle cx="3.1" cy="46.0" r="0.75" opacity="0.2"/><circle cx="18.3" cy="132.5" r="0.6" opacity="0.28"/><circle cx="25.2" cy="60.9" r="0.5" opacity="0.2"/><circle cx="43.4" cy="118.3" r="0.4" opacity="0.39"/><circle cx="38.9" cy="86.4" r="0.5" opacity="0.2"/><circle cx="14.9" cy="53.2" r="0.35" opacity="0.34"/><circle cx="93.2" cy="42.6" r="0.4" opacity="0.17"/><circle cx="47.2" cy="135.4" r="0.6" opacity="0.25"/><circle cx="51.9" cy="99.1" r="0.75" opacity="0.27"/><circle cx="9.2" cy="7.5" r="0.75" opacity="0.15"/><circle cx="70.0" cy="84.6" r="0.5" opacity="0.32"/><circle cx="56.1" cy="94.7" r="0.6" opacity="0.27"/><circle cx="4.4" cy="121.6" r="0.4" opacity="0.36"/><circle cx="78.5" cy="143.7" r="0.35" opacity="0.27"/><circle cx="62.5" cy="96.7" r="0.5" opacity="0.41"/><circle cx="67.7" cy="31.5" r="0.6" opacity="0.21"/></g><g class="kln"><line x1="6" y1="22" x2="14" y2="19"/><line x1="14" y1="19" x2="16" y2="28"/><line x1="16" y1="28" x2="8" y2="31"/><line x1="8" y1="31" x2="6" y2="22"/><line x1="14" y1="19" x2="22" y2="15"/><line x1="22" y1="15" x2="29" y2="12"/><line x1="29" y1="12" x2="36" y2="13"/><line x1="64" y1="13" x2="70" y2="19"/><line x1="70" y1="19" x2="77" y2="14"/><line x1="77" y1="14" x2="84" y2="21"/><line x1="84" y1="21" x2="91" y2="16"/><line x1="72" y1="52" x2="76" y2="62"/><line x1="86" y1="50" x2="84" y2="64"/><line x1="76" y1="62" x2="80" y2="63"/><line x1="80" y1="63" x2="84" y2="64"/><line x1="76" y1="62" x2="73" y2="76"/><line x1="84" y1="64" x2="88" y2="74"/><line x1="14" y1="92" x2="20" y2="100"/><line x1="20" y1="100" x2="26" y2="108"/><line x1="9" y1="103" x2="20" y2="100"/><line x1="20" y1="100" x2="31" y2="97"/><line x1="74" y1="112" x2="78" y2="123"/><line x1="69" y1="118" x2="83" y2="116"/></g><g class="kct"><circle cx="6" cy="22" r="1.0" opacity=".72"/><circle cx="14" cy="19" r="1.5" opacity=".95"/><circle cx="16" cy="28" r="1.0" opacity=".72"/><circle cx="8" cy="31" r="1.0" opacity=".72"/><circle cx="22" cy="15" r="1.0" opacity=".72"/><circle cx="29" cy="12" r="1.5" opacity=".95"/><circle cx="36" cy="13" r="1.0" opacity=".72"/><circle cx="64" cy="13" r="1.0" opacity=".72"/><circle cx="70" cy="19" r="1.0" opacity=".72"/><circle cx="77" cy="14" r="1.5" opacity=".95"/><circle cx="84" cy="21" r="1.0" opacity=".72"/><circle cx="91" cy="16" r="1.0" opacity=".72"/><circle cx="72" cy="52" r="1.5" opacity=".95"/><circle cx="86" cy="50" r="1.0" opacity=".72"/><circle cx="76" cy="62" r="1.0" opacity=".72"/><circle cx="80" cy="63" r="1.0" opacity=".72"/><circle cx="84" cy="64" r="1.0" opacity=".72"/><circle cx="73" cy="76" r="1.5" opacity=".95"/><circle cx="88" cy="74" r="1.0" opacity=".72"/><circle cx="14" cy="92" r="1.0" opacity=".72"/><circle cx="20" cy="100" r="1.5" opacity=".95"/><circle cx="26" cy="108" r="1.0" opacity=".72"/><circle cx="9" cy="103" r="1.0" opacity=".72"/><circle cx="31" cy="97" r="1.0" opacity=".72"/><circle cx="74" cy="112" r="1.0" opacity=".72"/><circle cx="78" cy="123" r="1.5" opacity=".95"/><circle cx="69" cy="118" r="1.0" opacity=".72"/><circle cx="83" cy="116" r="1.0" opacity=".72"/></g></svg></div>
   <div class="trek">
     <div class="tkbar">
       <button data-tk="a" class="on">本章</button>
       <button data-tk="b">地图</button>
       <button data-tk="c">宿营</button>
-      <button id="bTrekClose" class="x">关闭</button>
+      <button id="bTrekClose" class="kx">关闭</button>
     </div>
     <div class="tkin" id="tkIn"></div>
   </div>
@@ -1189,7 +1374,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v30";
+const APP_VER = "v37";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5100,10 +5285,80 @@ async function clearBg(){
 }
 
 
+
+/* ---------- 朗读 ----------
+   一条铁律：在你答出来之前，绝不能把答案念出来。
+   中译英那一页、残缺牌、拼写关和阶段考的题面，都属于「还没答」，一律不念。
+   答完之后念 —— 那一刻听到发音才是有用的，而且是唯一有用的时刻。 */
+const VOICE_KEY = "wordbox.voice";
+let voiceOn = true, enVoice = null, voiceReady = false;
+function pickVoice(){
+  if(!("speechSynthesis" in window)) return;
+  const vs = speechSynthesis.getVoices();
+  if(!vs.length) return;
+  /* 雅思偏英音，先找 en-GB。lang 的写法各家不一（en-GB / en_GB / en-gb），
+     所以统一成小写去中划线再比。 */
+  const norm = x => (x.lang||"").toLowerCase().replace(/_/g,"-");
+  const pref = ["en-gb", "en-us", "en"];
+  for(const p of pref){
+    const hit = vs.filter(x => p === "en" ? norm(x).startsWith("en") : norm(x).startsWith(p));
+    if(hit.length){ enVoice = hit.find(x => x.localService) || hit[0]; return; }
+  }
+}
+if("speechSynthesis" in window){
+  pickVoice();
+  /* getVoices() 首次常返回空数组，音色是异步载入的；
+     voiceschanged 在部分浏览器又不触发，所以再轮询几次兜底。 */
+  speechSynthesis.addEventListener("voiceschanged", pickVoice);
+  let tries = 0;
+  const poll = setInterval(() => { pickVoice(); if(enVoice || ++tries > 20) clearInterval(poll); }, 250);
+}
+/* iOS 要求首次朗读发生在用户手势里，否则整个通道是哑的。
+   第一次触摸时喂一段空白把它捅开。 */
+function unlockVoice(){
+  if(voiceReady || !("speechSynthesis" in window)) return;
+  voiceReady = true;
+  try{
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0; speechSynthesis.speak(u);
+  }catch(e){}
+}
+addEventListener("pointerdown", unlockVoice, {once:true});
+addEventListener("keydown", unlockVoice, {once:true});
+
+function speak(text, opt){
+  if(!text || !("speechSynthesis" in window)) return;
+  if(!voiceOn && !(opt && opt.force)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(String(text));
+    if(enVoice){ u.voice = enVoice; u.lang = enVoice.lang; } else u.lang = "en-GB";
+    u.rate = (opt && opt.slow) ? .62 : .88;   // 比默认慢一点，学习用
+    u.pitch = 1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function applyVoice(on){
+  voiceOn = !!on;
+  try{ localStorage.setItem(VOICE_KEY, voiceOn ? "1" : "0"); }catch(e){}
+  const b = $("bVoice");
+  if(b){ b.textContent = voiceOn ? "朗读 开" : "朗读 关"; b.classList.toggle("act", voiceOn); }
+  const s = $("vcState");
+  if(s) s.textContent = voiceOn ? "开" : "关";
+}
+
 /* ---------- 远征 ---------- */
 let tkTab = "a";
 const TK_CT = `<path d="M180 240L179 245L175 250L170 254L164 257L159 260L154 262L150 265L147 269L144 274L139 278L134 282L127 284L120 284L113 283L106 281L100 279L95 276L89 273L84 270L79 267L75 263L73 258L72 254L72 249L72 244L72 240L72 236L71 231L69 226L69 220L70 214L73 209L79 206L86 203L94 203L101 203L108 204L114 204L120 204L126 204L132 204L139 204L145 205L151 207L156 210L160 214L164 217L168 221L173 225L176 230L179 235Z"/><path d="M219 240L217 249L211 257L203 263L193 268L184 273L176 277L170 282L165 288L159 295L152 303L143 309L132 312L120 313L108 312L97 308L87 304L78 299L69 294L61 290L53 284L47 278L42 270L40 262L40 255L41 247L41 240L40 233L38 225L36 216L35 207L37 198L43 189L52 183L64 180L76 179L89 179L100 180L110 181L120 181L130 181L140 180L151 180L161 182L171 186L179 191L186 196L193 203L200 209L207 216L213 223L218 231Z"/><path d="M259 240L256 252L247 263L235 272L222 280L209 285L198 291L190 298L183 307L175 317L165 327L152 336L137 341L120 342L104 340L88 335L75 329L62 322L49 316L37 309L27 301L18 292L12 282L9 271L9 260L10 250L10 240L9 230L6 219L3 207L2 194L4 181L12 169L25 161L42 156L59 154L77 155L92 157L107 158L120 158L134 157L148 156L163 157L177 159L190 164L202 171L212 179L222 188L232 197L241 206L250 216L256 228Z"/><path d="M298 240L294 256L283 270L268 282L251 291L234 298L220 306L210 315L200 326L190 339L177 352L161 363L141 369L120 371L99 368L80 362L62 354L45 346L29 337L14 329L0 319L-11 307L-19 294L-23 280L-23 266L-21 253L-21 240L-22 227L-26 213L-30 198L-32 181L-28 164L-18 149L-2 138L19 132L42 130L64 131L85 134L103 135L120 135L137 134L156 133L175 133L193 137L210 143L225 152L239 162L251 173L263 184L275 196L287 210L295 224Z"/><path d="M337 240L332 259L319 276L301 291L279 302L259 311L242 320L229 331L218 345L206 361L190 377L170 390L146 398L120 400L94 396L71 389L49 379L29 369L9 359L-9 348L-26 336L-40 322L-50 306L-54 289L-54 272L-53 256L-52 240L-54 224L-58 207L-63 189L-65 168L-61 148L-49 129L-28 116L-3 108L25 106L52 107L77 110L99 112L120 112L141 110L164 109L187 110L209 114L230 122L249 132L265 145L280 158L295 172L310 187L323 203L333 221Z"/><path d="M376 240L370 263L355 283L333 300L308 313L284 324L265 335L249 348L236 364L221 383L203 401L179 417L151 426L120 429L90 424L62 415L36 404L12 392L-11 380L-33 368L-53 353L-69 337L-80 318L-85 298L-86 278L-84 258L-83 240L-85 222L-90 202L-96 179L-98 155L-93 131L-79 109L-55 93L-25 84L8 82L40 84L69 87L95 89L120 89L145 87L172 85L199 86L226 91L250 100L272 113L291 128L309 144L326 160L344 177L360 196L372 217Z"/><path d="M398 780L400 786L401 793L401 800L399 807L394 813L388 818L379 821L370 823L361 823L352 824L345 824L337 826L330 828L322 830L313 831L304 831L296 829L288 825L281 821L276 816L271 810L266 805L262 799L259 793L257 787L258 780L260 774L265 768L270 763L275 758L279 754L283 749L286 743L290 737L295 731L303 726L311 723L321 722L330 724L339 726L347 730L354 733L361 737L368 740L374 743L381 747L386 751L391 756L393 762L395 768L397 774Z"/><path d="M432 780L435 789L436 799L436 810L433 820L427 829L416 837L404 842L390 844L376 845L363 845L352 846L341 849L330 852L318 854L305 856L291 856L278 853L267 848L257 841L249 833L241 825L234 817L228 809L224 799L221 790L222 780L226 771L232 762L240 755L247 748L253 741L259 733L264 725L270 716L278 707L289 699L302 695L316 694L330 696L343 700L355 705L366 710L376 715L386 719L397 724L406 730L414 737L421 745L425 753L428 762L430 771Z"/><path d="M467 780L470 793L472 806L472 820L468 834L459 846L445 856L428 862L409 865L391 866L375 867L359 869L345 871L330 875L314 879L296 882L278 881L261 877L246 870L233 861L221 851L211 841L202 830L194 818L188 806L185 793L186 780L191 767L199 756L209 746L219 737L228 728L235 718L242 706L250 694L261 682L275 673L292 667L311 665L330 667L348 673L363 680L378 687L392 693L405 699L419 706L432 713L443 722L451 733L457 744L461 756L464 768Z"/><path d="M501 780L505 796L507 812L507 830L502 847L491 862L474 875L453 883L429 887L407 888L386 889L367 891L349 894L330 899L310 904L288 907L265 906L244 901L225 893L208 882L194 869L182 856L170 842L160 828L153 812L149 796L150 780L156 764L167 750L179 738L192 726L202 715L211 702L220 688L230 673L243 658L261 646L283 638L306 636L330 639L352 646L372 654L390 663L407 671L424 679L441 687L457 697L471 708L481 721L489 735L493 750L497 765Z"/><path d="M535 780L539 799L543 819L543 840L537 860L523 879L503 893L477 903L449 908L422 910L397 911L374 913L352 917L330 923L306 929L279 932L252 932L227 926L204 916L184 902L167 887L152 871L139 854L126 837L117 819L112 800L114 780L121 761L134 744L149 729L164 715L177 702L188 687L198 669L210 651L226 633L248 619L273 610L302 607L330 611L356 619L380 629L402 640L422 650L443 659L463 669L482 680L499 694L512 709L520 727L526 744L530 762Z"/><path d="M569 780L574 802L578 825L578 850L571 874L556 895L532 912L502 924L469 929L437 931L408 933L382 935L356 940L330 947L302 954L271 958L239 957L209 950L183 938L160 922L140 905L123 886L107 867L92 847L82 825L76 803L78 780L87 758L101 738L119 721L136 705L151 689L164 671L176 651L190 630L209 609L234 592L264 582L297 579L330 583L361 592L388 604L414 616L438 628L462 639L485 650L508 663L527 679L542 698L552 718L559 738L564 759Z"/><path d="M603 780L609 805L614 832L614 860L606 887L588 912L560 931L526 944L489 951L453 953L419 954L389 957L360 963L330 971L297 979L262 983L227 982L192 974L162 961L135 943L113 923L93 901L75 879L59 856L46 832L40 806L42 780L52 755L69 732L89 712L109 694L126 676L140 655L154 633L170 608L192 585L220 565L255 553L292 550L330 555L365 566L397 579L426 593L453 606L481 618L508 631L533 647L555 665L572 686L584 709L591 732L597 756Z"/><path d="M152 1180L150 1185L148 1191L145 1196L142 1200L139 1205L134 1209L128 1212L121 1214L115 1215L108 1216L103 1218L97 1220L90 1223L82 1226L74 1228L65 1228L57 1226L51 1222L47 1216L45 1210L44 1204L43 1198L42 1194L39 1189L36 1185L34 1180L32 1175L32 1169L34 1164L37 1159L41 1155L45 1151L49 1146L54 1141L60 1137L66 1134L74 1132L82 1133L90 1135L97 1139L102 1142L108 1146L113 1148L119 1149L126 1150L134 1151L142 1154L148 1157L153 1162L155 1168L154 1174Z"/><path d="M189 1180L186 1189L182 1197L178 1205L173 1212L168 1220L160 1226L151 1231L140 1234L129 1236L119 1237L110 1240L100 1244L90 1248L78 1253L65 1256L51 1256L38 1253L28 1246L22 1237L18 1227L17 1217L15 1209L13 1202L9 1195L5 1188L0 1180L-2 1172L-2 1163L1 1155L6 1147L12 1140L19 1133L25 1126L33 1119L42 1112L52 1107L65 1104L78 1105L90 1108L101 1114L110 1120L118 1126L126 1129L136 1131L147 1132L160 1134L172 1138L183 1144L190 1152L193 1161L192 1171Z"/><path d="M226 1180L221 1192L216 1203L210 1214L204 1224L197 1234L186 1243L173 1249L159 1254L144 1256L130 1259L117 1262L104 1267L90 1274L74 1280L55 1285L36 1285L19 1280L5 1271L-4 1258L-8 1245L-10 1231L-12 1220L-15 1210L-21 1200L-27 1191L-33 1180L-36 1169L-36 1157L-32 1146L-25 1135L-17 1125L-8 1116L1 1106L11 1096L24 1086L38 1079L55 1076L73 1077L90 1082L105 1090L117 1098L128 1105L139 1110L153 1113L168 1115L186 1117L203 1122L217 1131L227 1142L231 1154L230 1167Z"/><path d="M263 1180L256 1195L250 1209L243 1223L235 1237L225 1249L212 1260L196 1268L177 1274L159 1277L141 1280L125 1284L108 1291L90 1299L69 1307L46 1313L22 1313L-0 1307L-18 1295L-29 1280L-35 1262L-38 1245L-40 1231L-44 1218L-51 1206L-59 1193L-66 1180L-71 1166L-70 1151L-65 1136L-56 1123L-46 1111L-35 1098L-23 1086L-10 1073L6 1061L24 1052L46 1047L68 1049L90 1055L109 1065L125 1076L139 1085L153 1091L169 1095L189 1097L212 1100L233 1107L252 1117L264 1131L269 1147L268 1164Z"/><path d="M300 1180L292 1198L284 1215L276 1232L266 1249L254 1264L238 1277L218 1287L196 1294L173 1298L152 1301L132 1307L112 1315L90 1325L65 1334L36 1341L7 1342L-19 1334L-41 1320L-54 1301L-62 1280L-65 1259L-68 1241L-73 1226L-81 1211L-90 1196L-100 1180L-105 1162L-104 1145L-98 1127L-87 1111L-75 1096L-61 1081L-47 1066L-31 1050L-12 1036L10 1025L37 1019L64 1021L90 1029L113 1041L132 1054L149 1065L166 1072L186 1077L211 1079L237 1083L264 1091L286 1104L301 1121L307 1140L306 1161Z"/><path d="M350 1520L351 1525L350 1529L348 1533L345 1537L341 1541L338 1545L334 1548L329 1551L324 1554L318 1555L312 1555L306 1554L300 1553L295 1551L290 1550L285 1550L279 1550L273 1549L266 1549L260 1547L255 1543L251 1539L250 1534L250 1529L252 1524L253 1520L254 1516L256 1512L257 1508L259 1504L261 1500L265 1497L269 1494L274 1492L279 1490L283 1488L288 1485L294 1483L300 1481L307 1480L313 1480L319 1482L324 1486L328 1490L330 1495L332 1499L335 1502L337 1505L341 1509L345 1512L348 1516Z"/><path d="M387 1520L388 1528L386 1536L382 1543L377 1550L371 1556L365 1562L358 1568L350 1574L341 1578L331 1580L320 1581L310 1579L300 1576L291 1574L283 1572L274 1571L264 1571L253 1571L241 1569L230 1566L222 1560L216 1553L214 1544L214 1536L217 1527L219 1520L221 1513L223 1506L225 1499L229 1492L233 1486L239 1480L247 1476L255 1472L263 1468L272 1464L280 1460L290 1456L300 1452L311 1451L323 1451L333 1455L342 1461L348 1469L352 1476L356 1483L359 1490L364 1495L370 1500L377 1506L383 1513Z"/><path d="M423 1520L424 1531L422 1542L416 1553L409 1562L401 1571L392 1580L382 1589L371 1596L358 1602L344 1606L329 1606L314 1604L300 1600L287 1596L276 1594L263 1592L249 1592L233 1592L217 1590L201 1585L189 1577L181 1566L178 1554L179 1542L182 1531L185 1520L189 1510L191 1500L194 1490L199 1481L205 1472L214 1464L225 1457L236 1452L248 1446L260 1441L272 1435L285 1429L300 1424L316 1422L332 1423L347 1428L359 1436L368 1447L374 1458L379 1468L384 1477L391 1484L400 1492L409 1500L418 1509Z"/><path d="M459 1520L461 1534L458 1549L451 1562L441 1575L430 1587L419 1598L407 1609L392 1619L376 1627L357 1631L337 1631L318 1629L300 1624L284 1619L268 1615L252 1614L234 1614L213 1613L192 1610L172 1604L156 1594L146 1580L142 1564L143 1549L147 1534L151 1520L156 1507L159 1494L163 1482L169 1469L177 1457L189 1447L202 1438L217 1431L233 1425L248 1418L263 1410L281 1402L300 1396L321 1393L342 1394L361 1401L377 1412L388 1425L396 1440L402 1453L409 1464L418 1474L430 1484L442 1494L452 1506Z"/>`;
-const walkSvg = () => `<svg viewBox="0 0 100 100"><g fill="var(--gd)" stroke="var(--gd)"><use href="#tkWalk"/></g></svg>`;
+/* 立体：先压一层偏移的暗影，再用渐变画本体。两层就够出体积，比滤镜稳。 */
+const figSvg = (sym, c) => `<svg viewBox="-5 -5 110 112">
+  <g transform="translate(3,3.6)" fill="var(--fig-sh)" stroke="var(--fig-sh)"><use href="#${sym}"/></g>
+  <g fill="${c || "var(--fig)"}" stroke="${c || "var(--fig)"}"><use href="#${sym}"/></g></svg>`;
+const walkSvg = c => figSvg("tkWalk", c);
+/* 宿营用平面剪影 —— 夜里逆着篝火看过去，本来就只剩一个轮廓，
+   给它打高光和渐变反而不对。 */
+const flatSvg = sym => `<svg viewBox="0 0 100 100">
+  <g fill="var(--acc1)" stroke="var(--acc1)"><use href="#${sym}"/></g></svg>`;
 const pct1 = v => (v*100).toFixed(1).replace(/\.0$/,"");
 
 function tkLeg(){
@@ -5118,42 +5373,64 @@ function tkLeg(){
                 {lb:"错题", f:w=>!w.grad && w.box===0},
                 ...BINS.filter(b=>b.k>=1&&b.k<=5).map(b=>({lb:b.lb, f:w=>!w.grad && w.box===b.k && !fresh(w)})),
                 {lb:"毕业", f:w=>w.grad}];
-  const L=5, R=95, sp=R-L;
+  const L=6, R=94, sp=R-L;
   const posts = MARK.map((m,i) => {
     const x = L + i/(MARK.length-1)*sp;
     const past = lg.pct*100 >= (x-L)/sp*100 - 1;
-    const cls = m.lb==="错题" ? "er" : m.lb==="毕业" ? "gd" : (past ? "pa" : "");
-    return `<div class="ps ${past?"pa":""}" style="left:${x}%"></div>
-      <div class="pl ${cls}" style="left:${x}%"><div class="s">${m.lb}</div>
-      <div class="n">${ws.filter(m.f).length}</div></div>`;
+    const tone = m.lb==="错题" ? "ker" : m.lb==="毕业" ? "kgd" : (past ? "kpa" : "");
+    const edge = i===0 ? "kfirst" : i===MARK.length-1 ? "klast" : "";
+    return `<div class="kps ${past?"kpa":""}" style="left:${x}%"></div>
+      <div class="kpl ${tone} ${edge}" style="left:${x}%"><div class="ks">${m.lb}</div>
+      <div class="kn">${ws.filter(m.f).length}</div></div>`;
   }).join("");
   const wx = L + lg.pct*sp, yx = L + was*sp;
+  /* 磷火点只落在已走过的那段路上 —— 没走过的地方不该有余光 */
+  let fx = "";
+  const nfx = Math.min(5, Math.floor(lg.pct * 14));
+  for(let i=0;i<nfx;i++){
+    const t = (i+1)/(nfx+1);
+    fx += `<span class="kfx" style="left:${(L + lg.pct*sp*t).toFixed(2)}%;`
+        + `animation-delay:${(i*.72).toFixed(2)}s"></span>`;
+  }
+  const nFresh = ws.filter(fresh).length;
+  const nGrad  = ws.filter(w=>w.grad).length;
+  const nErr   = ws.filter(w=>!w.grad && w.box===0).length;
+  const nWay   = ws.length - nFresh - nGrad - nErr;
+  const pp = n => ws.length ? (n/ws.length*100).toFixed(2) : 0;
   return `<div class="tkh">
       <div class="tkk">Current Leg</div>
       <div class="tkt">${esc(u)}</div>
       <p class="tkl">小人走的是<b>这一章</b>，不是整册。路标是从未学到毕业的八站，位置＝这
         ${lg.n} 个词的平均盒号。<b>亮的那一小段是今天走的。</b></p>
-      <div class="tkc">${lg.n} WD<br>${pct1(lg.pct)}%<br>+${pct1(gain)}</div>
+      <div class="tkc">${lg.n} WD<br>${pct1(lg.pct)}%<br>${APP_VER}</div>
     </div>
-    <div class="leg">
-      <div class="gn"><div class="a">今天走了</div>
-        <div class="b${gain<=0?" zero":""}">+${pct1(gain)}%</div>
-        <div class="c">${stats.up} 个词往上升了一盒</div></div>
-      <svg class="rg" viewBox="0 0 400 96" preserveAspectRatio="none">
-        <path d="M0 96 L0 64 L44 30 L88 60 L136 22 L188 58 L238 34 L292 62 L342 28 L400 52 L400 96Z"
-          fill="var(--rf)"/></svg>
-      <div class="rd"></div>
-      <div class="rdd" style="width:${was*sp}%"></div>
-      <div class="rdt" style="left:${yx}%;width:${gain*sp}%"></div>
-      ${posts}
-      <div class="wk" style="left:${wx}%">${walkSvg()}</div>
+    <div class="kgn"><span class="ka">今天走了</span>
+      <span class="kb${gain<=0?" kzero":""}">+${pct1(gain)}%</span>
+      <span class="kc"><em>${stats.up}</em> 个词升了一盒<br><em>${stats.grad}</em> 个毕业</span></div>
+    <div class="kleg kpaper">
+      <span class="kbrass kb1"></span><span class="kbrass kb2"></span>
+      <span class="kbrass kb3"></span><span class="kbrass kb4"></span>
+      <svg class="krg" viewBox="0 0 400 190" preserveAspectRatio="none"><path class="kf" d="M123 120L120 123L117 125L115 128L114 130L112 132L109 135L105 136L102 137L98 138L94 138L90 139L86 141L80 142L75 141L71 140L68 137L67 133L67 130L67 127L66 125L65 122L63 120L61 117L60 114L61 111L63 108L66 106L70 104L73 102L77 101L81 99L85 99L90 99L94 101L97 103L100 105L103 106L107 107L112 107L117 108L122 110L124 113L124 117Z"/><path class="kf" d="M147 120L143 125L138 129L134 134L131 138L128 142L123 145L117 148L110 150L104 151L97 152L90 154L82 156L73 158L64 157L56 155L51 150L49 144L49 137L50 132L49 128L46 124L42 120L39 115L37 110L39 104L43 100L48 96L54 92L60 89L67 86L74 84L82 83L90 84L97 87L103 91L108 94L113 96L120 97L128 98L137 100L145 103L150 108L150 114Z"/><path class="kf" d="M172 120L165 127L159 133L153 139L149 145L144 151L137 156L129 160L119 162L109 164L100 166L90 169L79 172L66 174L53 174L42 170L35 163L32 154L32 145L32 138L31 132L27 126L22 120L17 113L15 105L17 98L23 91L30 86L39 81L48 76L57 72L67 68L79 67L90 69L100 73L109 78L116 83L123 86L133 87L145 88L158 91L169 96L175 103L176 112Z"/><path class="kf" d="M196 120L188 129L179 137L172 145L167 153L160 160L151 167L140 172L128 175L115 177L103 180L90 183L75 187L59 190L42 190L28 185L18 175L14 164L14 152L15 143L14 135L8 128L1 120L-5 111L-8 101L-5 91L2 82L13 75L24 69L35 63L47 57L60 53L75 51L90 53L103 59L114 65L123 71L133 75L146 77L161 79L178 82L192 89L201 98L201 109Z"/><path class="km" d="M275 96L275 98L273 101L273 103L272 105L272 108L270 112L268 114L263 116L259 116L254 114L250 112L247 111L244 110L241 110L237 110L232 109L229 108L226 106L224 104L223 101L222 99L221 96L221 93L222 90L223 88L227 86L231 85L235 84L238 84L241 83L243 81L246 79L250 76L255 75L259 75L263 77L266 80L268 82L269 85L271 87L273 89L275 91L276 94Z"/><path class="km" d="M295 96L294 100L292 104L290 108L289 113L288 118L286 124L281 128L274 131L265 131L257 128L250 125L244 122L239 121L233 120L226 121L219 120L212 118L207 115L203 110L202 105L200 101L199 96L199 91L199 86L203 82L209 78L216 76L223 75L229 74L234 73L238 69L243 65L250 61L258 59L266 59L273 62L278 67L282 72L284 76L287 80L291 84L294 87L295 92Z"/><path class="km" d="M315 96L313 102L310 108L308 114L306 120L305 128L302 136L295 142L284 146L272 146L260 143L250 138L242 134L234 131L226 131L216 131L205 130L195 128L188 123L183 116L181 110L179 103L177 96L176 89L177 82L182 75L190 70L201 68L211 66L220 65L227 62L233 58L240 52L250 46L262 43L273 43L283 47L291 54L296 61L300 67L304 73L309 78L313 84L315 90Z"/><path class="km" d="M335 96L332 104L328 111L325 119L324 128L322 138L318 148L308 157L295 161L279 161L263 157L250 151L239 145L230 142L219 142L206 142L192 141L179 137L169 131L163 123L159 114L157 105L155 96L154 87L155 77L161 69L172 63L186 59L200 57L211 56L220 52L228 46L238 38L250 31L265 26L280 27L293 33L303 41L309 50L315 59L320 66L327 73L332 80L335 88Z"/><path class="kn2" d="M356 140L353 142L351 144L348 146L347 147L346 149L345 152L343 154L340 155L337 156L334 156L330 157L326 156L323 156L319 156L316 155L313 153L312 150L311 148L311 146L311 144L310 142L308 140L306 138L305 135L305 132L307 130L310 128L314 127L317 127L320 126L324 125L327 125L330 125L333 125L336 126L339 127L342 128L345 129L348 129L352 131L355 132L357 135L357 137Z"/><path class="kn2" d="M377 140L372 144L367 147L364 150L361 153L359 157L357 161L354 165L349 168L343 169L336 170L330 170L324 170L317 170L310 169L304 166L300 163L297 159L296 154L296 150L295 147L293 144L290 140L286 136L284 131L284 126L288 122L294 119L300 117L307 116L313 115L318 114L324 112L330 112L336 112L342 114L347 116L352 118L357 119L363 121L370 123L375 126L379 130L379 135Z"/><path class="kn2" d="M398 140L391 146L384 151L379 155L375 159L373 165L370 170L365 176L357 180L349 182L339 183L330 183L321 183L311 183L302 181L293 178L286 174L283 167L281 161L281 155L280 150L277 145L272 140L266 134L263 127L264 120L269 114L277 110L287 107L296 105L305 104L313 102L321 100L330 99L339 100L347 102L354 105L361 108L369 110L378 112L387 115L396 120L401 126L401 133Z"/></svg>
+      <div class="kgrid"></div>
+      <div class="kcase"></div>
+      <div class="krd"></div>
+      <div class="krdd" style="width:${was*sp}%"></div>
+      <div class="krdt" style="left:${yx}%;width:${gain*sp}%"></div>
+      ${posts}${fx}
+      <div class="kwk" style="left:${wx}%">${walkSvg()}</div>
     </div>
-    <div class="tkq">
-      <div class="d"><div class="k">未学</div><div class="v">${ws.filter(fresh).length}</div></div>
-      <div class="a"><div class="k">在途</div><div class="v">${ws.filter(w=>!w.grad&&!fresh(w)&&w.box>0).length}</div></div>
-      <div class="b"><div class="k">毕业</div><div class="v">${ws.filter(w=>w.grad).length}</div></div>
-      <div class="c"><div class="k">错题</div><div class="v">${ws.filter(w=>!w.grad&&w.box===0).length}</div></div>
-    </div>`;
+    <div class="kdist">
+      <i class="kseg1" style="width:${pp(nFresh)}%"></i><i class="kseg2" style="width:${pp(nWay)}%"></i>
+      <i class="kseg3" style="width:${pp(nGrad)}%"></i><i class="kseg4" style="width:${pp(nErr)}%"></i>
+    </div>
+    <div class="kleg2">
+      <div><i class="kseg1"></i>未学 <b>${nFresh}</b></div>
+      <div><i class="kseg2"></i>在途 <b>${nWay}</b></div>
+      <div><i class="kseg3"></i>毕业 <b>${nGrad}</b></div>
+      <div><i class="kseg4"></i>错题 <b>${nErr}</b></div>
+    </div>
+    </div>
+`;
 }
 
 function tkAtlas(){
@@ -5166,26 +5443,39 @@ function tkAtlas(){
   const dDone = "M" + pts.slice(0, last+1).map(p=>p[0].toFixed(1)+" "+p[1]).join("L");
   const nodes = list.map((u,i) => {
     const [x,y] = pts[i], lg = legOf(u);
-    const cls = lg.pct >= 1 ? "f" : (u === here ? "h" : (lg.pct > 0 ? "w" : ""));
-    const off = OFF.has(u) ? " off" : "";
-    return `<div class="nd ${cls}${off}" style="left:${x}%;top:${y}px"><div class="dt"></div>
-      <div class="cd ${x<50?"R":"L"}"><div class="no">CH ${String(i+1).padStart(2,"0")}</div>
-      <div class="nm">${esc(u.replace(/^第\s*\d+\s*章\s*/,""))}</div>
-      <div class="pc">${lg.pct>0 ? pct1(lg.pct)+"%" : lg.n+" 词"}</div></div></div>`;
+    const cls = lg.pct >= 1 ? "kf" : (u === here ? "kh" : (lg.pct > 0 ? "kw" : ""));
+    const off = OFF.has(u) ? " koff" : "";
+    return `<div class="knd ${cls}${off}" style="left:${x}%;top:${y}px"><div class="kdt"></div>
+      <div class="kcd ${x<50?"kR":"kL"}"><div class="kno">CH ${String(i+1).padStart(2,"0")}</div>
+      <div class="knm">${esc(u.replace(/^第\s*\d+\s*章\s*/,""))}</div>
+      <div class="kpc">${lg.pct>0 ? pct1(lg.pct)+"%" : lg.n+" 词"}</div></div></div>`;
   }).join("");
   const walked = list.filter(u => legOf(u).pct > 0).length;
   return `<div class="tkh"><div class="tkk">Atlas</div><div class="tkt">全程</div>
       <p class="tkl">${list.length} 章。这一屏是<b>慢的</b> —— 一章要啃一两个月，它不该每天变。
         想看今天走了多少，回「本章」那一屏。</p>
-      <div class="tkc">${list.length} CH<br>${S.length} WD<br>${walked} 起程</div></div>
-    <div class="atl" style="height:${H}px">
-      <svg class="rl" viewBox="0 0 400 ${H}" preserveAspectRatio="none">
-        <g fill="none" stroke="var(--rf)" stroke-width="1">${TK_CT}</g></svg>
-      <svg class="rt" viewBox="0 0 100 ${H}" preserveAspectRatio="none">
-        <path d="${dAll}" fill="none" stroke="var(--ah)" stroke-width="1.1" stroke-dasharray="3 3"
+      <div class="tkc">${list.length} CH<br>${S.length} WD<br>${APP_VER}</div></div>
+    <div class="katl kpaper" style="height:${H}px">
+      <span class="kbrass kb1"></span><span class="kbrass kb2"></span>
+      <span class="kbrass kb3"></span><span class="kbrass kb4"></span>
+      <svg class="krl" viewBox="0 0 400 ${H}" preserveAspectRatio="none">
+        <g fill="none" stroke="var(--line)" stroke-opacity=".55" stroke-width="1">${TK_CT}</g></svg>
+      <svg class="krt" viewBox="0 0 100 ${H}" preserveAspectRatio="none">
+        <path d="${dAll}" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="4 4"
           stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-        <path d="${dDone}" fill="none" stroke="var(--gd)" stroke-width="2"
+        <path d="${dDone}" fill="none" stroke="var(--mp)" stroke-width="6"
+          stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+        <path d="${dDone}" fill="none" stroke="var(--acc1)" stroke-width="2.4"
           stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+      <div class="krose"><svg viewBox="0 0 40 42">
+        <g transform="translate(.9,1.1)" opacity=".3">
+          <circle cx="20" cy="22" r="11"/><circle cx="20" cy="22" r="7"/>
+          <path d="M20 8 L20 36 M6 22 L34 22"/>
+          <path d="M20 9 L23 22 L20 35 L17 22 Z" fill="currentColor" stroke="none"/></g>
+        <circle cx="20" cy="22" r="11"/><circle cx="20" cy="22" r="7"/>
+        <path d="M20 8 L20 36 M6 22 L34 22"/>
+        <path d="M20 9 L23 22 L20 35 L17 22 Z" fill="url(#kroseG)" stroke="none"/>
+        <text x="20" y="6" text-anchor="middle">N</text></svg></div>
       ${nodes}</div>`;
 }
 
@@ -5195,27 +5485,31 @@ function tkCamp(){
   const nxt = live().filter(w => w.due > now()).sort((a,b)=>a.due-b.due);
   const due = live().filter(w => w.due <= now()).length;
   const net = stats.fell - stats.up;
-  let st = ""; for(let i=0;i<24;i++)
-    st += `<i style="left:${(i*37%94)+3}%;top:${(i*53%48)+4}%"></i>`;
+  const st = "";   /* 星空已经铺满整屏，插图框里不再重复撒星 */
   const d = new Date();
   return `<div class="tkh"><div class="tkk">Camp · ${d.getMonth()+1} 月 ${d.getDate()} 日</div>
       <div class="tkt">今天到此</div>
       <p class="tkl">到期的词做完就收工。只记录真的发生了什么 ——
         <b>没有目标，没有连击，没有催促。</b></p></div>
-    <div class="cmp">${st}
-      <svg class="cr" viewBox="0 0 400 84" preserveAspectRatio="none">
-        <path d="M0 84 L0 54 L46 24 L92 52 L142 16 L196 50 L244 28 L300 56 L348 24 L400 46 L400 84Z"
-          fill="var(--rf)"/></svg><div class="fr"></div>
-      <svg width="80" height="80" viewBox="0 0 100 100"><g fill="var(--gd)" stroke="var(--gd)">
-        <use href="#tkTent"/></g></svg>
-      <svg width="50" height="50" viewBox="0 0 100 100"><g fill="var(--gd)" stroke="var(--gd)">
-        <use href="#tkWalk"/></g></svg></div>
+    <div class="kcmp">
+      <svg class="kcons" hidden viewBox="0 0 100 60"><g class="kln"><line x1="6" y1="18" x2="13" y2="15"/><line x1="13" y1="15" x2="20" y2="17"/><line x1="20" y1="17" x2="27" y2="22"/><line x1="27" y1="22" x2="35" y2="20"/><line x1="35" y1="20" x2="43" y2="26"/><line x1="43" y1="26" x2="50" y2="22"/><line x1="20" y1="17" x2="35" y2="20"/></g>
+        <g class="kdotc"><circle cx="6" cy="18" r="1.5"/><circle cx="13" cy="15" r="1.05"/><circle cx="20" cy="17" r="1.05"/><circle cx="27" cy="22" r="1.05"/><circle cx="35" cy="20" r="1.05"/><circle cx="43" cy="26" r="1.05"/><circle cx="50" cy="22" r="1.5"/><line x1="63" y1="12" x2="70" y2="20"/><line x1="70" y1="20" x2="78" y2="14"/><line x1="63" y1="12" x2="68" y2="28"/><line x1="78" y1="14" x2="78" y2="29"/><line x1="68" y1="28" x2="73" y2="30"/><line x1="73" y1="30" x2="78" y2="29"/><line x1="68" y1="28" x2="66" y2="42"/><line x1="78" y1="29" x2="80" y2="40"/><circle cx="63" cy="12" r="1.5"/><circle cx="70" cy="20" r="1.05"/><circle cx="78" cy="14" r="1.05"/><circle cx="68" cy="28" r="1.05"/><circle cx="73" cy="30" r="1.05"/><circle cx="78" cy="29" r="1.05"/><circle cx="66" cy="42" r="1.05"/><circle cx="80" cy="40" r="1.5"/><line x1="24" y1="52" x2="31" y2="46"/><line x1="31" y1="46" x2="38" y2="52"/><line x1="38" y1="52" x2="45" y2="45"/><line x1="45" y1="45" x2="52" y2="50"/><circle cx="24" cy="52" r="1.5"/><circle cx="31" cy="46" r="1.05"/><circle cx="38" cy="52" r="1.05"/><circle cx="45" cy="45" r="1.05"/><circle cx="52" cy="50" r="1.5"/></g></svg>
+      <span class="kbrass kb1"></span><span class="kbrass kb2"></span>
+      <span class="kbrass kb3"></span><span class="kbrass kb4"></span>
+      ${st}<div class="kmoon"></div>
+      <svg class="kcr" viewBox="0 100 400 100" preserveAspectRatio="none">
+        <path class="kf" d="M0 200 L0 59 L22 42 L44 53 L67 48 L89 56 L111 43 L133 52 L156 46 L178 51 L200 45 L222 62 L244 61 L267 63 L289 41 L311 47 L333 38 L356 58 L378 53 L400 59 L400 200 Z"/>
+        <path class="km" d="M0 200 L0 60 L22 56 L44 57 L67 44 L89 48 L111 47 L133 60 L156 47 L178 59 L200 47 L222 57 L244 56 L267 67 L289 45 L311 59 L333 42 L356 56 L378 42 L400 51 L400 200 Z"/>
+        <path class="kn2" d="M0 200 L0 71 L22 70 L44 77 L67 58 L89 60 L111 52 L133 79 L156 49 L178 64 L200 61 L222 69 L244 65 L267 80 L289 53 L311 65 L333 47 L356 81 L378 57 L400 67 L400 200 Z"/></svg>
+      <div class="kground"></div><div class="kfr"></div>
+      <span class="kart" style="width:82px;height:82px">${flatSvg("tkTent")}</span>
+      <span class="kart" style="width:50px;height:50px">${flatSvg("tkWalk")}</span></div>
     <div class="tkr">
-      <div class="r up"><span>往上升了一盒</span><span>${stats.up}</span></div>
-      <div class="r gd"><span>毕业</span><span>${stats.grad}</span></div>
-      <div class="r er"><span>掉回错题盒</span><span>${stats.fell}</span></div>
-      <div class="r mu"><span>错题盒净变化</span><span>${net>0?"+":net<0?"−":""}${Math.abs(net)}</span></div>
-      <div class="r mu"><span>做了</span><span>${stats.pages} 页</span></div>
+      <div class="kr kup"><span>往上升了一盒</span><span>${stats.up}</span></div>
+      <div class="kr kgd"><span>毕业</span><span>${stats.grad}</span></div>
+      <div class="kr ker"><span>掉回错题盒</span><span>${stats.fell}</span></div>
+      <div class="kr kmu"><span>错题盒净变化</span><span>${net>0?"+":net<0?"−":""}${Math.abs(net)}</span></div>
+      <div class="kr kmu"><span>做了</span><span>${stats.pages} 页</span></div>
     </div>
     <p class="tkf">${due ? `还有 <b>${due} 个词</b>到期，没做完。`
         : nxt.length ? `下一批 <b>${nxt.filter(w=>w.due<=nxt[0].due+60000).length} 个词</b>在 ${fmt(nxt[0].due-now())}后到期。`
@@ -5224,6 +5518,8 @@ function tkCamp(){
 }
 
 function drawTrek(){
+  /* 白天画图、夜里宿营 —— 整屏换页，不是只换图上那一块 */
+  $("dTrek").dataset.mode = tkTab === "c" ? "night" : "paper";
   $("tkIn").innerHTML = tkTab === "a" ? tkLeg() : tkTab === "b" ? tkAtlas() : tkCamp();
   document.querySelectorAll(".tkbar [data-tk]").forEach(b => b.classList.toggle("on", b.dataset.tk === tkTab));
   const sc = document.querySelector(".trek"); if(sc) sc.scrollTop = 0;
@@ -5413,6 +5709,19 @@ function drawHero(el){
   if(el){ h.classList.remove("idle"); t.textContent = el.textContent; $("heroK").textContent = "正在配对" + tail; }
   else  { h.classList.add("idle");    t.textContent = "";           $("heroK").textContent = "点左边任意一张" + tail; }
   fitHero();
+  /* 念不念，看这一刻答案是否已经摆在你眼前：
+     英→中的完整牌 —— 词就写在卡上，念它只是补个发音，不泄题；
+     残缺牌 —— 正要你从残缺里取回它，念出来等于直接给答案；
+     中→英 —— 英文就是答案，更不能念。 */
+  const canSay = !!(el && el._w && page && page.dir === "en2zh" && !el._w._mask);
+  const sb = $("bSay");
+  if(sb){
+    sb.hidden = !el;
+    sb.disabled = !canSay;
+    sb.style.opacity = canSay ? "" : ".25";
+    sb.title = canSay ? "再听一遍（长按放慢）" : "这一张还没揭晓，不能听";
+  }
+  if(canSay) speak(el._w.en);
 }
 function hideHero(){ const h = $("hero"); if(h) h.hidden = true; }
 
@@ -5503,6 +5812,7 @@ function tap(el){
       say(`对 —— 进 <b>${BINS[w.box].lb}</b>。`, "ok");
     }
     fly(sel, w.box, w.en);
+    if(page.dir === "zh2en" || w._mask) speak(w.en);   // 这两种情况刚才没念，现在揭晓了
     lock(sel); lock(el); sel = null; t0 = 0; drawHero(null);
     afterPage();
   }else{
@@ -5554,12 +5864,14 @@ function overlay(inner, ms, done){
 }
 /* 拼写关：考的是拼写，所以并排给出正确的和你打错的，教训在差异里 */
 function flashWord(correct, typed, done){
+  speak(correct);
   overlay(`<div class="fl">正确拼写</div>
          <div class="fw">${esc(correct)}</div>
          ${typed ? `<div class="ft">你打的是 <s>${esc(typed)}</s></div>` : ""}`, 2000, done);
 }
 /* 阶段考：考的是语境，所以给整句 —— 你需要看见它填进去之后长什么样 */
 function flashSent(w, label, done){
+  speak(w.en);
   const e = esc(w.sent || "");
   const body = e.includes("___")
     ? e.replace("___", `<b>${esc(w.en)}</b>`)
@@ -5591,6 +5903,7 @@ function typing(){
     if(v === w.en){
       bumpStat("up"); w.hit++; w.box = Math.min(5, Math.max(1, w.box + 1)); w.due = now() + IV[w.box];
       say(`拼对 —— 进 <b>${BINS[w.box].lb}</b>。`, "ok"); fly(from, w.box, w.en);
+      speak(w.en);
       tq.shift(); drawBins(); drawHead(); save();
       setTimeout(() => tq.length ? typing() : render(), 850);
     }else{
@@ -6044,6 +6357,21 @@ $("bUnitDel").onclick    = delUnit;
 $("bFile").onclick   = () => $("fTxt").click();
 $("fTxt").onchange   = e => { if(e.target.files.length) loadTxt(e.target.files); e.target.value=""; };
 
+$("bVoice").onclick = () => applyVoice(!voiceOn);
+{
+  let hold = 0, slow = false;
+  const b = $("bSay");
+  const fire = () => {
+    const w = sel && sel._w;
+    if(!w) return;
+    /* 手动点是明确的意图，所以 force —— 但仍然守着不泄题那条线：
+       残缺牌和中译英方向，按钮本身就是灰的，点了也不念。 */
+    if(page && page.dir === "en2zh" && !w._mask) speak(w.en, {force:true, slow});
+  };
+  b.addEventListener("pointerdown", () => { slow = false; hold = setTimeout(() => slow = true, 480); });
+  ["pointerup","pointerleave","pointercancel"].forEach(e =>
+    b.addEventListener(e, ev => { clearTimeout(hold); if(ev.type === "pointerup") fire(); }));
+}
 $("bTrek").onclick      = () => { rollStats(); tkTab = "a"; drawTrek(); $("dTrek").showModal(); };
 $("bTrekClose").onclick = () => $("dTrek").close();
 document.querySelectorAll(".tkbar [data-tk]").forEach(b =>
@@ -6098,6 +6426,7 @@ setInterval(() => {
 let savedSkin = "y2k";
 try{ savedSkin = localStorage.getItem(SKIN_KEY) || "y2k"; }catch(e){}
 applySkin(savedSkin);
+try{ applyVoice(localStorage.getItem(VOICE_KEY) !== "0"); }catch(e){ applyVoice(true); }
 $("ver").textContent = "词盒 " + APP_VER;
 addEventListener("resize", fitHero);
 load();
