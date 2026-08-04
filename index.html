@@ -514,6 +514,24 @@ body{
 .bgrow{display:flex;align-items:center;gap:12px;margin-top:9px}
 .bgrow input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
 .bgrow .v{font-family:var(--f-num);font-size:12px;color:var(--mute);width:38px;text-align:right}
+/* 音色列表：按口音分组，一行一个，点了就试听 */
+.vgrp{margin-bottom:12px}
+.vgrp:last-child{margin-bottom:0}
+.vgrp .eb{display:block;margin-bottom:6px}
+.vrow{display:flex;flex-wrap:wrap;gap:6px}
+.vc{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:pointer;
+  border:var(--bw) solid var(--edge);border-radius:var(--pill);
+  background:var(--surf-img,none),var(--surf);box-shadow:var(--sh-card);
+  color:var(--ink);font-family:var(--f-ui);font-size:12.5px;font-weight:600;
+  text-transform:none;letter-spacing:0}
+.vc.on{border-color:var(--acc);background:var(--acc-img,none),var(--acc);color:var(--acc-ink);
+  box-shadow:var(--sh-acc)}
+.vc small{font-family:var(--f-num);font-size:9.5px;opacity:.65;letter-spacing:.06em}
+.vnone{font-size:12.5px;color:var(--mute);font-family:var(--f-ui);line-height:1.7}
+.vnow{font-family:var(--f-ui);font-size:12.5px;line-height:1.7;margin-bottom:9px;
+  padding:9px 12px;border:var(--bw) solid var(--edge);border-radius:var(--r);
+  background:var(--well);box-shadow:var(--sh-well)}
+.vnow b{color:var(--acc)} .vnow s{color:var(--warn);text-decoration:none}
 /* 机壳。--shell-pad 为 0 的皮肤等于没有它 */
 .shell,.board{background:var(--shell-img,none),var(--shell-bg);
   border:var(--shell-bd) solid var(--edge);border-radius:var(--shell-r);
@@ -850,9 +868,9 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 .ksky2{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .25s}
 #dTrek[data-mode="night"] .ksky2{opacity:1}
 .ksky2 svg{width:100%;height:100%;display:block}
-.ksky2 .kbgst circle{fill:#9FBDD8}
-.ksky2 .kln line{stroke:#7FA6C8;stroke-opacity:.24;stroke-width:.28;vector-effect:non-scaling-stroke}
-.ksky2 .kct circle{fill:#E4F0FA}
+.ksky2 .kbgst circle{fill:#8FAECB}
+.ksky2 .kln line{stroke:#7FA6C8;stroke-opacity:.2;stroke-width:.26;vector-effect:non-scaling-stroke}
+.ksky2 .kct circle{fill:#DCEBF8}
 .trek{max-height:84vh;overflow:auto;position:relative;z-index:1}
 /* 羊皮的纸面。规则的 repeating-gradient 一定会显出栅格，所以纹理全部改用
    feTurbulence 噪声 —— 那才是纸张纤维该有的随机。上面再叠岁月的痕迹：
@@ -1033,18 +1051,37 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 .kcmp .kmoon{position:absolute;right:36px;top:26px;width:26px;height:26px;border-radius:50%;z-index:2;
   background:radial-gradient(circle at 34% 32%,#F2F7FC,#B9CDE0 62%,#8FA9C2);
   box-shadow:0 0 30px rgba(190,214,238,.38),inset -3px -3px 7px rgba(90,120,150,.4)}
-.kcmp .kcr{position:absolute;left:0;right:0;bottom:0;height:122px}
+.kcmp .kcr{position:absolute;left:0;right:0;bottom:44px;height:74px}
+/* 树林：三排，越近越大、越黑。这就是「由近及远越来越暗」的载体 —— 
+   火光是有限的，只够照亮最近这一排，往后一排比一排沉进夜色里。 */
+.kcmp .ktree{position:absolute;left:0;right:0;bottom:0;height:104px}
+.kcmp .ktree path{stroke:none}
+.kcmp .ktree .ktf path{fill:#16273A}
+.kcmp .ktree .ktm path{fill:#0F1D2C}
+.kcmp .ktree .ktn path{fill:#070E17}
 .kcmp .kcr .kf{fill:#101C2A;stroke:none} .kcmp .kcr .km{fill:#152537;stroke:none}
 .kcmp .kcr .kn2{fill:#1A2E43;stroke:none}
-.kcmp .kfr{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:154px;height:154px;
-  border-radius:50%;background:radial-gradient(circle,rgba(232,177,74,.3),transparent 66%);
-  animation:kflick 3.4s ease-in-out infinite}
-@keyframes kflick{0%,100%{opacity:.8;transform:translateX(-50%) scale(1)}
-  50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
+/* 火光两层：里层小而亮，外层大而散。中间陡、边缘长，才像真的光在衰减 */
+.kcmp .kfr{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:120px;height:120px;
+  border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(255,214,138,.62) 0%,rgba(240,176,66,.34) 26%,
+    rgba(214,140,40,.14) 48%,transparent 70%);
+  animation:kflick 2.6s ease-in-out infinite}
+.kcmp .kfr2{position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:330px;height:230px;
+  border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(226,158,54,.2) 0%,rgba(196,124,36,.09) 34%,transparent 66%);
+  animation:kflick2 4.3s ease-in-out infinite}
+@keyframes kflick{0%,100%{opacity:.82;transform:translateX(-50%) scale(1)}
+  38%{opacity:1;transform:translateX(-50%) scale(1.07)}
+  62%{opacity:.9;transform:translateX(-50%) scale(1.02)}}
+@keyframes kflick2{0%,100%{opacity:.72}50%{opacity:1}}
 .kcmp .kart{position:relative;z-index:2;display:block}
 .kcmp .kart svg{width:100%;height:100%;display:block}
-.kcmp .kground{position:absolute;left:0;right:0;bottom:0;height:26px;
-  background:linear-gradient(180deg,rgba(26,46,67,.92),#09121B)}
+/* 地面：中间被火照亮，往两边和往远处迅速沉下去 */
+.kcmp .kground{position:absolute;left:0;right:0;bottom:0;height:34px;
+  background:
+    radial-gradient(ellipse 46% 150% at 50% 100%,rgba(210,146,52,.26),transparent 62%),
+    linear-gradient(180deg,#0A1520,#05090F)}
 .tkr{border:1px solid var(--gl-e);border-radius:5px;overflow:hidden;background:var(--gl)}
 .tkr .kr{display:flex;justify-content:space-between;align-items:baseline;padding:13px 15px;
   border-bottom:1px solid var(--rf);font-size:13.5px;position:relative}
@@ -1275,7 +1312,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 </div></dialog>
 
 <dialog id="dTrek">
-  <div class="ksky2" aria-hidden="true"><svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid slice"><g class="kbgst"><circle cx="45.4" cy="83.0" r="0.6" opacity="0.27"/><circle cx="84.1" cy="30.2" r="0.75" opacity="0.27"/><circle cx="60.9" cy="29.6" r="0.6" opacity="0.22"/><circle cx="10.7" cy="118.8" r="0.35" opacity="0.31"/><circle cx="40.0" cy="67.8" r="0.75" opacity="0.32"/><circle cx="61.8" cy="121.9" r="0.35" opacity="0.16"/><circle cx="20.3" cy="37.6" r="0.35" opacity="0.36"/><circle cx="33.3" cy="87.5" r="0.4" opacity="0.29"/><circle cx="63.5" cy="74.5" r="0.35" opacity="0.27"/><circle cx="28.7" cy="145.7" r="0.35" opacity="0.34"/><circle cx="32.3" cy="35.8" r="0.5" opacity="0.15"/><circle cx="56.1" cy="18.4" r="0.35" opacity="0.38"/><circle cx="39.1" cy="140.0" r="0.35" opacity="0.2"/><circle cx="91.0" cy="10.5" r="0.6" opacity="0.41"/><circle cx="40.2" cy="13.4" r="0.4" opacity="0.36"/><circle cx="27.9" cy="15.5" r="0.5" opacity="0.14"/><circle cx="41.4" cy="135.0" r="0.4" opacity="0.21"/><circle cx="11.7" cy="11.6" r="0.6" opacity="0.19"/><circle cx="55.7" cy="67.0" r="0.4" opacity="0.42"/><circle cx="75.9" cy="62.9" r="0.6" opacity="0.17"/><circle cx="42.4" cy="33.4" r="0.5" opacity="0.38"/><circle cx="95.6" cy="87.8" r="0.35" opacity="0.2"/><circle cx="39.9" cy="125.2" r="0.75" opacity="0.17"/><circle cx="97.0" cy="33.5" r="0.5" opacity="0.14"/><circle cx="60.6" cy="121.7" r="0.6" opacity="0.16"/><circle cx="10.7" cy="86.3" r="0.4" opacity="0.14"/><circle cx="37.4" cy="92.0" r="0.4" opacity="0.41"/><circle cx="48.4" cy="85.2" r="0.6" opacity="0.19"/><circle cx="16.8" cy="132.9" r="0.75" opacity="0.21"/><circle cx="20.2" cy="108.7" r="0.75" opacity="0.2"/><circle cx="93.2" cy="129.2" r="0.75" opacity="0.16"/><circle cx="6.6" cy="18.6" r="0.75" opacity="0.41"/><circle cx="24.9" cy="103.8" r="0.5" opacity="0.26"/><circle cx="88.9" cy="73.2" r="0.75" opacity="0.19"/><circle cx="71.2" cy="12.8" r="0.4" opacity="0.27"/><circle cx="64.7" cy="91.1" r="0.35" opacity="0.22"/><circle cx="90.1" cy="32.2" r="0.35" opacity="0.16"/><circle cx="41.5" cy="38.6" r="0.35" opacity="0.19"/><circle cx="37.4" cy="84.8" r="0.4" opacity="0.17"/><circle cx="15.3" cy="67.4" r="0.5" opacity="0.32"/><circle cx="68.4" cy="86.6" r="0.4" opacity="0.31"/><circle cx="90.7" cy="70.9" r="0.5" opacity="0.34"/><circle cx="94.4" cy="6.0" r="0.35" opacity="0.28"/><circle cx="72.1" cy="48.6" r="0.35" opacity="0.16"/><circle cx="54.4" cy="108.4" r="0.4" opacity="0.36"/><circle cx="89.8" cy="53.3" r="0.6" opacity="0.39"/><circle cx="85.6" cy="62.7" r="0.35" opacity="0.38"/><circle cx="57.0" cy="92.4" r="0.6" opacity="0.25"/><circle cx="3.2" cy="13.3" r="0.35" opacity="0.32"/><circle cx="97.4" cy="128.8" r="0.5" opacity="0.25"/><circle cx="72.6" cy="86.1" r="0.6" opacity="0.27"/><circle cx="54.0" cy="77.2" r="0.75" opacity="0.15"/><circle cx="59.7" cy="71.8" r="0.4" opacity="0.41"/><circle cx="12.8" cy="114.5" r="0.6" opacity="0.21"/><circle cx="3.1" cy="46.0" r="0.75" opacity="0.2"/><circle cx="18.3" cy="132.5" r="0.6" opacity="0.28"/><circle cx="25.2" cy="60.9" r="0.5" opacity="0.2"/><circle cx="43.4" cy="118.3" r="0.4" opacity="0.39"/><circle cx="38.9" cy="86.4" r="0.5" opacity="0.2"/><circle cx="14.9" cy="53.2" r="0.35" opacity="0.34"/><circle cx="93.2" cy="42.6" r="0.4" opacity="0.17"/><circle cx="47.2" cy="135.4" r="0.6" opacity="0.25"/><circle cx="51.9" cy="99.1" r="0.75" opacity="0.27"/><circle cx="9.2" cy="7.5" r="0.75" opacity="0.15"/><circle cx="70.0" cy="84.6" r="0.5" opacity="0.32"/><circle cx="56.1" cy="94.7" r="0.6" opacity="0.27"/><circle cx="4.4" cy="121.6" r="0.4" opacity="0.36"/><circle cx="78.5" cy="143.7" r="0.35" opacity="0.27"/><circle cx="62.5" cy="96.7" r="0.5" opacity="0.41"/><circle cx="67.7" cy="31.5" r="0.6" opacity="0.21"/></g><g class="kln"><line x1="6" y1="22" x2="14" y2="19"/><line x1="14" y1="19" x2="16" y2="28"/><line x1="16" y1="28" x2="8" y2="31"/><line x1="8" y1="31" x2="6" y2="22"/><line x1="14" y1="19" x2="22" y2="15"/><line x1="22" y1="15" x2="29" y2="12"/><line x1="29" y1="12" x2="36" y2="13"/><line x1="64" y1="13" x2="70" y2="19"/><line x1="70" y1="19" x2="77" y2="14"/><line x1="77" y1="14" x2="84" y2="21"/><line x1="84" y1="21" x2="91" y2="16"/><line x1="72" y1="52" x2="76" y2="62"/><line x1="86" y1="50" x2="84" y2="64"/><line x1="76" y1="62" x2="80" y2="63"/><line x1="80" y1="63" x2="84" y2="64"/><line x1="76" y1="62" x2="73" y2="76"/><line x1="84" y1="64" x2="88" y2="74"/><line x1="14" y1="92" x2="20" y2="100"/><line x1="20" y1="100" x2="26" y2="108"/><line x1="9" y1="103" x2="20" y2="100"/><line x1="20" y1="100" x2="31" y2="97"/><line x1="74" y1="112" x2="78" y2="123"/><line x1="69" y1="118" x2="83" y2="116"/></g><g class="kct"><circle cx="6" cy="22" r="1.0" opacity=".72"/><circle cx="14" cy="19" r="1.5" opacity=".95"/><circle cx="16" cy="28" r="1.0" opacity=".72"/><circle cx="8" cy="31" r="1.0" opacity=".72"/><circle cx="22" cy="15" r="1.0" opacity=".72"/><circle cx="29" cy="12" r="1.5" opacity=".95"/><circle cx="36" cy="13" r="1.0" opacity=".72"/><circle cx="64" cy="13" r="1.0" opacity=".72"/><circle cx="70" cy="19" r="1.0" opacity=".72"/><circle cx="77" cy="14" r="1.5" opacity=".95"/><circle cx="84" cy="21" r="1.0" opacity=".72"/><circle cx="91" cy="16" r="1.0" opacity=".72"/><circle cx="72" cy="52" r="1.5" opacity=".95"/><circle cx="86" cy="50" r="1.0" opacity=".72"/><circle cx="76" cy="62" r="1.0" opacity=".72"/><circle cx="80" cy="63" r="1.0" opacity=".72"/><circle cx="84" cy="64" r="1.0" opacity=".72"/><circle cx="73" cy="76" r="1.5" opacity=".95"/><circle cx="88" cy="74" r="1.0" opacity=".72"/><circle cx="14" cy="92" r="1.0" opacity=".72"/><circle cx="20" cy="100" r="1.5" opacity=".95"/><circle cx="26" cy="108" r="1.0" opacity=".72"/><circle cx="9" cy="103" r="1.0" opacity=".72"/><circle cx="31" cy="97" r="1.0" opacity=".72"/><circle cx="74" cy="112" r="1.0" opacity=".72"/><circle cx="78" cy="123" r="1.5" opacity=".95"/><circle cx="69" cy="118" r="1.0" opacity=".72"/><circle cx="83" cy="116" r="1.0" opacity=".72"/></g></svg></div>
+  <div class="ksky2" aria-hidden="true"><svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid slice"><g class="kbgst"><circle cx="90.8" cy="37.7" r="0.3" opacity="0.1"/><circle cx="31.4" cy="18.3" r="0.45" opacity="0.13"/><circle cx="20.4" cy="20.7" r="0.35" opacity="0.22"/><circle cx="88.6" cy="7.2" r="0.55" opacity="0.18"/><circle cx="51.2" cy="30.7" r="0.45" opacity="0.25"/><circle cx="21.7" cy="3.8" r="0.45" opacity="0.23"/><circle cx="61.6" cy="38.4" r="0.45" opacity="0.21"/><circle cx="84.6" cy="38.3" r="0.45" opacity="0.23"/><circle cx="32.2" cy="6.3" r="0.55" opacity="0.14"/><circle cx="48.4" cy="32.6" r="0.35" opacity="0.14"/><circle cx="19.1" cy="16.2" r="0.35" opacity="0.22"/><circle cx="9.9" cy="20.0" r="0.45" opacity="0.29"/><circle cx="28.9" cy="25.8" r="0.3" opacity="0.17"/><circle cx="29.7" cy="15.5" r="0.55" opacity="0.21"/><circle cx="26.8" cy="7.3" r="0.3" opacity="0.24"/><circle cx="81.5" cy="12.8" r="0.35" opacity="0.28"/><circle cx="58.9" cy="37.6" r="0.35" opacity="0.19"/><circle cx="5.2" cy="27.2" r="0.55" opacity="0.1"/><circle cx="79.7" cy="29.1" r="0.35" opacity="0.26"/><circle cx="93.1" cy="24.0" r="0.55" opacity="0.25"/><circle cx="35.2" cy="38.5" r="0.55" opacity="0.2"/><circle cx="5.6" cy="13.9" r="0.35" opacity="0.25"/><circle cx="46.1" cy="15.1" r="0.3" opacity="0.12"/><circle cx="52.8" cy="10.0" r="0.35" opacity="0.15"/><circle cx="42.5" cy="36.2" r="0.55" opacity="0.25"/><circle cx="65.0" cy="19.6" r="0.35" opacity="0.28"/><circle cx="68.0" cy="19.5" r="0.35" opacity="0.21"/><circle cx="42.8" cy="15.2" r="0.3" opacity="0.27"/><circle cx="12.4" cy="27.2" r="0.45" opacity="0.29"/><circle cx="72.0" cy="20.2" r="0.35" opacity="0.29"/><circle cx="9.5" cy="24.9" r="0.3" opacity="0.15"/><circle cx="55.8" cy="21.6" r="0.55" opacity="0.3"/><circle cx="28.1" cy="16.7" r="0.3" opacity="0.26"/><circle cx="15.6" cy="35.1" r="0.35" opacity="0.26"/></g><g class="kln"><line x1="6" y1="22" x2="14" y2="19"/><line x1="14" y1="19" x2="16" y2="28"/><line x1="16" y1="28" x2="8" y2="31"/><line x1="8" y1="31" x2="6" y2="22"/><line x1="14" y1="19" x2="22" y2="15"/><line x1="22" y1="15" x2="29" y2="12"/><line x1="29" y1="12" x2="36" y2="13"/><line x1="64" y1="13" x2="70" y2="19"/><line x1="70" y1="19" x2="77" y2="14"/><line x1="77" y1="14" x2="84" y2="21"/><line x1="84" y1="21" x2="91" y2="16"/><line x1="72" y1="52" x2="76" y2="62"/><line x1="86" y1="50" x2="84" y2="64"/><line x1="76" y1="62" x2="80" y2="63"/><line x1="80" y1="63" x2="84" y2="64"/><line x1="76" y1="62" x2="73" y2="76"/><line x1="84" y1="64" x2="88" y2="74"/><line x1="14" y1="92" x2="20" y2="100"/><line x1="20" y1="100" x2="26" y2="108"/><line x1="9" y1="103" x2="20" y2="100"/><line x1="20" y1="100" x2="31" y2="97"/><line x1="74" y1="112" x2="78" y2="123"/><line x1="69" y1="118" x2="83" y2="116"/></g><g class="kct"><circle cx="6" cy="22" r="1.0" opacity=".72"/><circle cx="14" cy="19" r="1.5" opacity=".95"/><circle cx="16" cy="28" r="1.0" opacity=".72"/><circle cx="8" cy="31" r="1.0" opacity=".72"/><circle cx="22" cy="15" r="1.0" opacity=".72"/><circle cx="29" cy="12" r="1.5" opacity=".95"/><circle cx="36" cy="13" r="1.0" opacity=".72"/><circle cx="64" cy="13" r="1.0" opacity=".72"/><circle cx="70" cy="19" r="1.0" opacity=".72"/><circle cx="77" cy="14" r="1.5" opacity=".95"/><circle cx="84" cy="21" r="1.0" opacity=".72"/><circle cx="91" cy="16" r="1.0" opacity=".72"/><circle cx="72" cy="52" r="1.5" opacity=".95"/><circle cx="86" cy="50" r="1.0" opacity=".72"/><circle cx="76" cy="62" r="1.0" opacity=".72"/><circle cx="80" cy="63" r="1.0" opacity=".72"/><circle cx="84" cy="64" r="1.0" opacity=".72"/><circle cx="73" cy="76" r="1.5" opacity=".95"/><circle cx="88" cy="74" r="1.0" opacity=".72"/><circle cx="14" cy="92" r="1.0" opacity=".72"/><circle cx="20" cy="100" r="1.5" opacity=".95"/><circle cx="26" cy="108" r="1.0" opacity=".72"/><circle cx="9" cy="103" r="1.0" opacity=".72"/><circle cx="31" cy="97" r="1.0" opacity=".72"/><circle cx="74" cy="112" r="1.0" opacity=".72"/><circle cx="78" cy="123" r="1.5" opacity=".95"/><circle cx="69" cy="118" r="1.0" opacity=".72"/><circle cx="83" cy="116" r="1.0" opacity=".72"/></g></svg></div>
   <div class="trek">
     <div class="tkbar">
       <button data-tk="a" class="on">本章</button>
@@ -1291,6 +1328,18 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
   <div class="dh"><h2>外观</h2><button id="bSkinClose" class="g x">关闭</button></div>
   <p>换皮不动数据 —— 进度、词库、单元一律原样。选完立刻生效，也会跟着备份走。</p>
   <div id="skinList"></div>
+
+  <div class="eb" style="margin:18px 0 6px">朗读音色</div>
+  <p>设备上装了哪些音色由系统决定，各家都不一样。<b>点一下就试听</b>，选中的会记住。<br>
+     iOS 自带的英音默认是 Daniel（男声，偏低沉），嫌糙就换一个。
+     想要更好的音色：iOS「设置 → 辅助功能 → 朗读内容 → 声音」里可以下载增强版。</p>
+  <p id="vcNow" class="vnow"></p>
+  <div id="voiceList"></div>
+  <div class="bgrow" style="margin-top:11px">
+    <span class="eb" style="flex:none">语速</span>
+    <input type="range" id="vcRate" min="50" max="120" step="5">
+    <span class="v" id="vcRateV">0.88</span>
+  </div>
 
   <div class="eb" style="margin:18px 0 6px">自定义背景</div>
   <p>选一张本地图片铺在底下。图片<b>只存在这台设备上</b>，不上传，也不会进备份 JSON ——
@@ -1374,7 +1423,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v37";
+const APP_VER = "v40";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5290,28 +5339,96 @@ async function clearBg(){
    一条铁律：在你答出来之前，绝不能把答案念出来。
    中译英那一页、残缺牌、拼写关和阶段考的题面，都属于「还没答」，一律不念。
    答完之后念 —— 那一刻听到发音才是有用的，而且是唯一有用的时刻。 */
-const VOICE_KEY = "wordbox.voice";
-let voiceOn = true, enVoice = null, voiceReady = false;
+const VOICE_KEY = "wordbox.voice", VNAME_KEY = "wordbox.voiceName",
+      VRATE_KEY = "wordbox.voiceRate", VACC_KEY = "wordbox.voiceAccent";
+let voiceOn = true, enVoice = null, voiceReady = false, voiceRate = .88,
+    wantVoice = "", wantAccent = "en-gb";
+const vLang = x => (x.lang || "").toLowerCase().replace(/_/g, "-");
+/* 英语音色，按口音分组 */
+function enVoices(){
+  if(!("speechSynthesis" in window)) return [];
+  return speechSynthesis.getVoices().filter(v => vLang(v).startsWith("en"));
+}
+/* 默认挑谁：iOS 自带英音第一个是 Daniel，低沉沙哑，很多人嫌糙。
+   所以先按名字找几个公认清亮的，找不到再退回任意 en-GB。 */
+const SMOOTH = ["serena","kate","martha","stephanie","google uk english female",
+                "samantha","karen","moira","fiona"];
+/* 挑音色。这里有个必须守住的东西：**口音不能悄悄漂移**。
+   听力要杂口音，那是输入；朗读是给口语当模板的，输出必须收在一套里 ——
+   元音系统半英半美、rhotic 时有时无，出来的就是四不像。
+   所以除了记住音色名字，还要单独记住口音族：换设备、系统更新、音色被删，
+   都退回同一个口音里找替补，而不是随便抓一个英语音色。 */
 function pickVoice(){
-  if(!("speechSynthesis" in window)) return;
-  const vs = speechSynthesis.getVoices();
+  const vs = enVoices();
   if(!vs.length) return;
-  /* 雅思偏英音，先找 en-GB。lang 的写法各家不一（en-GB / en_GB / en-gb），
-     所以统一成小写去中划线再比。 */
-  const norm = x => (x.lang||"").toLowerCase().replace(/_/g,"-");
-  const pref = ["en-gb", "en-us", "en"];
-  for(const p of pref){
-    const hit = vs.filter(x => p === "en" ? norm(x).startsWith("en") : norm(x).startsWith(p));
-    if(hit.length){ enVoice = hit.find(x => x.localService) || hit[0]; return; }
+  if(wantVoice){
+    const hit = vs.find(v => v.name === wantVoice);
+    if(hit){ enVoice = hit; wantAccent = vLang(hit).slice(0, 5); return; }
   }
+  const fam = vs.filter(v => vLang(v).startsWith(wantAccent));
+  const pool = fam.length ? fam : vs;         // 这个口音一个都没有了，才退到别处
+  for(const n of SMOOTH){
+    const hit = pool.find(v => v.name.toLowerCase().includes(n));
+    if(hit){ enVoice = hit; return; }
+  }
+  enVoice = pool[0];
+}
+function accentOf(v){
+  const l = vLang(v);
+  return l.startsWith("en-gb") ? "英音" : l.startsWith("en-us") ? "美音"
+       : l.startsWith("en-au") ? "澳音" : l.startsWith("en-in") ? "印度英语"
+       : l.startsWith("en-ie") ? "爱尔兰" : l.startsWith("en-za") ? "南非" : "其他";
+}
+function drawVoices(){
+  const box = $("voiceList"); if(!box) return;
+  const vs = enVoices();
+  const now = $("vcNow");
+  if(now){
+    const ACC = {"en-gb":"英音","en-us":"美音","en-au":"澳音","en-in":"印度英语",
+                 "en-ie":"爱尔兰","en-za":"南非"};
+    if(!enVoice) now.innerHTML = "还没选到可用的音色。";
+    else{
+      const drift = wantVoice && enVoice.name !== wantVoice;
+      now.innerHTML = `当前：<b>${esc(enVoice.name)} · ${ACC[vLang(enVoice).slice(0,5)] || enVoice.lang}</b>`
+        + (drift ? `<br><s>原来选的「${esc(wantVoice)}」这台设备上没有，已在同口音里换了一个。</s>` : "")
+        + `<br><span style="color:var(--mute)">朗读是给口语当模板的，所以只用一种口音 ——
+           换设备或系统更新后也会退回<b>同一个口音</b>里找替补，不会漂到别的口音去。</span>`;
+    }
+  }
+  if(!vs.length){
+    box.innerHTML = `<p class="vnone">这台设备上没找到英语音色。
+      iOS 在「设置 → 辅助功能 → 朗读内容 → 声音」里添加，Android 在系统的文字转语音设置里。</p>`;
+    return;
+  }
+  const order = ["英音","美音","澳音","爱尔兰","南非","印度英语","其他"];
+  const grp = {};
+  vs.forEach(v => { const a = accentOf(v); (grp[a] = grp[a] || []).push(v); });
+  box.innerHTML = order.filter(a => grp[a]).map(a =>
+    `<div class="vgrp"><span class="eb">${a}</span><div class="vrow">${
+      grp[a].map(v => `<button class="vc${enVoice && v.name === enVoice.name ? " on" : ""}"
+        data-v="${esc(v.name)}">${esc(v.name)}<small>${esc(v.lang)}</small></button>`).join("")
+    }</div></div>`).join("");
+  box.querySelectorAll("[data-v]").forEach(b => b.onclick = () => {
+    wantVoice = b.dataset.v;
+    const v = enVoices().find(x => x.name === wantVoice);
+    if(v) wantAccent = vLang(v).slice(0, 5);
+    try{ localStorage.setItem(VNAME_KEY, wantVoice);
+         localStorage.setItem(VACC_KEY, wantAccent); }catch(e){}
+    pickVoice(); drawVoices();
+    speak("sediment", {force:true});      // 选完立刻听一句
+  });
 }
 if("speechSynthesis" in window){
+  try{ wantVoice = localStorage.getItem(VNAME_KEY) || ""; }catch(e){}
+  try{ wantAccent = localStorage.getItem(VACC_KEY) || "en-gb"; }catch(e){}
+  try{ voiceRate = Math.min(1.2, Math.max(.5, (+localStorage.getItem(VRATE_KEY) || 88) / 100)); }catch(e){}
   pickVoice();
   /* getVoices() 首次常返回空数组，音色是异步载入的；
      voiceschanged 在部分浏览器又不触发，所以再轮询几次兜底。 */
   speechSynthesis.addEventListener("voiceschanged", pickVoice);
   let tries = 0;
-  const poll = setInterval(() => { pickVoice(); if(enVoice || ++tries > 20) clearInterval(poll); }, 250);
+  const poll = setInterval(() => { pickVoice(); if($("voiceList")) drawVoices();
+    if(enVoice || ++tries > 20) clearInterval(poll); }, 250);
 }
 /* iOS 要求首次朗读发生在用户手势里，否则整个通道是哑的。
    第一次触摸时喂一段空白把它捅开。 */
@@ -5333,7 +5450,7 @@ function speak(text, opt){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(String(text));
     if(enVoice){ u.voice = enVoice; u.lang = enVoice.lang; } else u.lang = "en-GB";
-    u.rate = (opt && opt.slow) ? .62 : .88;   // 比默认慢一点，学习用
+    u.rate = (opt && opt.slow) ? Math.max(.4, voiceRate - .26) : voiceRate;
     u.pitch = 1;
     speechSynthesis.speak(u);
   }catch(e){}
@@ -5497,11 +5614,13 @@ function tkCamp(){
       <span class="kbrass kb1"></span><span class="kbrass kb2"></span>
       <span class="kbrass kb3"></span><span class="kbrass kb4"></span>
       ${st}<div class="kmoon"></div>
-      <svg class="kcr" viewBox="0 100 400 100" preserveAspectRatio="none">
-        <path class="kf" d="M0 200 L0 59 L22 42 L44 53 L67 48 L89 56 L111 43 L133 52 L156 46 L178 51 L200 45 L222 62 L244 61 L267 63 L289 41 L311 47 L333 38 L356 58 L378 53 L400 59 L400 200 Z"/>
-        <path class="km" d="M0 200 L0 60 L22 56 L44 57 L67 44 L89 48 L111 47 L133 60 L156 47 L178 59 L200 47 L222 57 L244 56 L267 67 L289 45 L311 59 L333 42 L356 56 L378 42 L400 51 L400 200 Z"/>
-        <path class="kn2" d="M0 200 L0 71 L22 70 L44 77 L67 58 L89 60 L111 52 L133 79 L156 49 L178 64 L200 61 L222 69 L244 65 L267 80 L289 53 L311 65 L333 47 L356 81 L378 57 L400 67 L400 200 Z"/></svg>
-      <div class="kground"></div><div class="kfr"></div>
+      <svg class="kcr" viewBox="0 0 400 100" preserveAspectRatio="none">
+        <path class="kf" d="M0 100 L0 62 L44 44 L92 60 L142 40 L196 58 L244 46 L300 62 L348 44 L400 56 L400 100 Z"/>
+        <path class="km" d="M0 100 L0 72 L52 58 L104 74 L160 54 L214 72 L268 60 L322 76 L376 58 L400 66 L400 100 Z"/>
+      </svg>
+      <!-- 树林：三排剪影，越近越大越黑 —— 火光照到的只有最近这一排 -->
+      <svg class="ktree" viewBox="0 0 400 100" preserveAspectRatio="none"><g class="ktf"><path d="M8.6 74 L3.8 69.0 L6.4 69.0 L4.1 65.0 L6.6 65.0 L5.1 61.0 L7.0 61.0 L5.7 56.9 L7.3 56.9 L8.6 51.5 L9.9 56.9 L11.5 56.9 L10.0 61.0 L11.7 61.0 L10.3 65.0 L12.4 65.0 L11.2 69.0 L14.3 69.0 Z"/><path d="M39.1 74 L34.9 68.8 L37.2 68.8 L35.7 64.6 L37.6 64.6 L36.1 60.4 L37.7 60.4 L36.9 56.1 L38.1 56.1 L39.1 50.5 L40.1 56.1 L41.2 56.1 L40.5 60.4 L42.1 60.4 L41.0 64.6 L43.4 64.6 L41.3 68.8 L44.1 68.8 Z"/><path d="M55.2 74 L50.0 68.2 L52.9 68.2 L50.7 63.5 L53.2 63.5 L51.5 58.8 L53.5 58.8 L52.2 54.1 L53.8 54.1 L55.2 47.8 L56.5 54.1 L58.1 54.1 L56.9 58.8 L59.1 58.8 L56.8 63.5 L58.8 63.5 L57.4 68.2 L60.1 68.2 Z"/><path d="M83.5 74 L77.6 67.8 L80.8 67.8 L78.5 62.8 L81.2 62.8 L79.8 57.7 L81.8 57.7 L80.8 52.6 L82.3 52.6 L83.5 45.9 L84.6 52.6 L86.0 52.6 L85.3 57.7 L87.4 57.7 L85.5 62.8 L88.1 62.8 L86.1 67.8 L89.4 67.8 Z"/><path d="M117.5 74 L112.0 69.2 L115.0 69.2 L113.1 65.3 L115.5 65.3 L113.3 61.4 L115.6 61.4 L114.8 57.5 L116.3 57.5 L117.5 52.3 L118.9 57.5 L120.6 57.5 L119.2 61.4 L121.3 61.4 L119.4 65.3 L121.8 65.3 L120.1 69.2 L123.3 69.2 Z"/><path d="M132.3 74 L126.5 68.8 L129.7 68.8 L126.2 64.5 L129.6 64.5 L128.4 60.3 L130.6 60.3 L128.7 56.0 L130.7 56.0 L132.3 50.3 L133.6 56.0 L135.3 56.0 L134.1 60.3 L136.3 60.3 L135.1 64.5 L138.4 64.5 L134.9 68.8 L138.1 68.8 Z"/><path d="M162.8 74 L157.0 68.5 L160.2 68.5 L158.0 64.0 L160.7 64.0 L159.2 59.5 L161.2 59.5 L159.3 55.0 L161.2 55.0 L162.8 49.0 L164.0 55.0 L165.5 55.0 L164.6 59.5 L166.9 59.5 L165.3 64.0 L168.4 64.0 L165.1 68.5 L167.9 68.5 Z"/><path d="M181.0 74 L175.2 68.5 L178.4 68.5 L176.3 63.9 L178.9 63.9 L177.0 59.4 L179.2 59.4 L178.2 54.8 L179.7 54.8 L181.0 48.8 L182.5 54.8 L184.3 54.8 L182.9 59.4 L185.3 59.4 L183.3 63.9 L186.0 63.9 L183.3 68.5 L186.1 68.5 Z"/><path d="M209.5 74 L203.3 70.4 L206.7 70.4 L204.1 67.5 L207.1 67.5 L204.6 64.6 L207.3 64.6 L206.2 61.7 L208.0 61.7 L209.5 57.8 L211.0 61.7 L212.9 61.7 L211.5 64.6 L214.0 64.6 L211.7 67.5 L214.3 67.5 L212.3 70.4 L215.8 70.4 Z"/><path d="M237.1 74 L230.8 68.6 L234.3 68.6 L231.5 64.1 L234.6 64.1 L232.5 59.7 L235.0 59.7 L234.1 55.2 L235.7 55.2 L237.1 49.3 L238.4 55.2 L240.0 55.2 L239.0 59.7 L241.3 59.7 L239.3 64.1 L242.1 64.1 L240.2 68.6 L244.0 68.6 Z"/><path d="M265.7 74 L260.8 68.0 L263.5 68.0 L261.0 63.1 L263.6 63.1 L261.9 58.2 L264.0 58.2 L262.6 53.3 L264.3 53.3 L265.7 46.8 L266.8 53.3 L268.3 53.3 L267.2 58.2 L269.0 58.2 L267.5 63.1 L269.7 63.1 L267.9 68.0 L270.5 68.0 Z"/><path d="M292.0 74 L286.3 69.3 L289.4 69.3 L286.2 65.5 L289.4 65.5 L287.3 61.6 L289.9 61.6 L288.1 57.8 L290.2 57.8 L292.0 52.7 L293.4 57.8 L295.2 57.8 L293.9 61.6 L296.1 61.6 L294.6 65.5 L297.8 65.5 L295.0 69.3 L298.8 69.3 Z"/><path d="M318.2 74 L312.8 70.3 L315.8 70.3 L314.8 67.2 L316.7 67.2 L314.7 64.1 L316.6 64.1 L315.9 61.1 L317.2 61.1 L318.2 57.0 L319.5 61.1 L321.1 61.1 L319.4 64.1 L321.0 64.1 L320.2 67.2 L322.6 67.2 L320.4 70.3 L323.2 70.3 Z"/><path d="M333.3 74 L328.2 67.9 L331.0 67.9 L328.8 62.9 L331.3 62.9 L329.7 57.9 L331.7 57.9 L330.5 52.9 L332.0 52.9 L333.3 46.3 L334.6 52.9 L336.1 52.9 L335.0 57.9 L337.2 57.9 L335.2 62.9 L337.5 62.9 L335.8 67.9 L338.9 67.9 Z"/><path d="M364.4 74 L358.8 69.7 L361.9 69.7 L359.3 66.2 L362.1 66.2 L360.1 62.7 L362.5 62.7 L361.6 59.2 L363.2 59.2 L364.4 54.5 L365.8 59.2 L367.6 59.2 L366.2 62.7 L368.4 62.7 L366.6 66.2 L369.3 66.2 L366.6 69.7 L369.3 69.7 Z"/><path d="M385.8 74 L380.7 69.6 L383.5 69.6 L380.8 65.9 L383.5 65.9 L382.1 62.3 L384.1 62.3 L383.0 58.6 L384.6 58.6 L385.8 53.8 L387.2 58.6 L388.8 58.6 L387.6 62.3 L389.7 62.3 L387.9 65.9 L390.6 65.9 L388.3 69.6 L391.4 69.6 Z"/></g><g class="ktm"><path d="M15.6 84 L8.9 77.6 L12.6 77.6 L10.2 72.4 L13.2 72.4 L11.3 67.2 L13.7 67.2 L11.4 62.0 L13.7 62.0 L15.6 55.1 L17.3 62.0 L19.4 62.0 L17.9 67.2 L20.7 67.2 L18.3 72.4 L21.6 72.4 L18.6 77.6 L22.3 77.6 Z"/><path d="M63.6 84 L54.6 76.2 L59.6 76.2 L57.4 69.8 L60.8 69.8 L58.1 63.4 L61.1 63.4 L59.4 57.0 L61.7 57.0 L63.6 48.5 L65.8 57.0 L68.5 57.0 L66.4 63.4 L69.9 63.4 L67.3 69.8 L71.7 69.8 L67.0 76.2 L71.1 76.2 Z"/><path d="M92.1 84 L84.6 77.0 L88.7 77.0 L84.3 71.3 L88.6 71.3 L86.7 65.6 L89.7 65.6 L87.5 59.8 L90.0 59.8 L92.1 52.2 L94.3 59.8 L97.0 59.8 L95.1 65.6 L98.7 65.6 L95.4 71.3 L99.4 71.3 L96.0 77.0 L100.8 77.0 Z"/><path d="M128.9 84 L120.6 75.3 L125.2 75.3 L121.6 68.2 L125.6 68.2 L122.4 61.1 L126.0 61.1 L124.8 54.1 L127.0 54.1 L128.9 44.6 L130.8 54.1 L133.1 54.1 L131.2 61.1 L133.9 61.1 L131.8 68.2 L135.3 68.2 L132.2 75.3 L136.2 75.3 Z"/><path d="M171.0 84 L164.6 76.8 L168.1 76.8 L165.2 70.9 L168.4 70.9 L166.8 65.0 L169.1 65.0 L167.5 59.1 L169.4 59.1 L171.0 51.2 L172.4 59.1 L174.2 59.1 L172.8 65.0 L175.1 65.0 L173.5 70.9 L176.4 70.9 L173.7 76.8 L177.1 76.8 Z"/><path d="M192.4 84 L184.7 75.6 L188.9 75.6 L186.7 68.7 L189.8 68.7 L187.5 61.8 L190.2 61.8 L188.3 55.0 L190.5 55.0 L192.4 45.8 L193.9 55.0 L195.8 55.0 L194.6 61.8 L197.2 61.8 L195.1 68.7 L198.4 68.7 L195.9 75.6 L200.3 75.6 Z"/><path d="M239.7 84 L233.4 76.0 L236.9 76.0 L234.2 69.5 L237.2 69.5 L235.2 62.9 L237.7 62.9 L236.3 56.4 L238.2 56.4 L239.7 47.7 L241.3 56.4 L243.2 56.4 L241.7 62.9 L244.1 62.9 L241.9 69.5 L244.5 69.5 L242.6 76.0 L246.1 76.0 Z"/><path d="M278.9 84 L269.6 78.5 L274.7 78.5 L272.0 74.0 L275.8 74.0 L272.2 69.4 L275.9 69.4 L274.3 64.9 L276.8 64.9 L278.9 58.9 L281.4 64.9 L284.5 64.9 L281.5 69.4 L284.6 69.4 L282.7 74.0 L287.3 74.0 L282.6 78.5 L287.2 78.5 Z"/><path d="M316.5 84 L308.9 77.7 L313.1 77.7 L309.3 72.6 L313.3 72.6 L311.2 67.4 L314.1 67.4 L311.5 62.3 L314.2 62.3 L316.5 55.4 L318.6 62.3 L321.2 62.3 L318.8 67.4 L321.7 67.4 L319.4 72.6 L322.9 72.6 L320.7 77.7 L325.8 77.7 Z"/><path d="M350.5 84 L342.0 78.1 L346.7 78.1 L343.8 73.2 L347.5 73.2 L344.4 68.4 L347.7 68.4 L346.3 63.6 L348.6 63.6 L350.5 57.1 L352.5 63.6 L355.0 63.6 L353.5 68.4 L357.2 68.4 L353.3 73.2 L356.8 73.2 L354.1 78.1 L358.6 78.1 Z"/><path d="M373.6 84 L365.7 74.8 L370.0 74.8 L366.3 67.2 L370.3 67.2 L368.3 59.7 L371.2 59.7 L368.6 52.2 L371.3 52.2 L373.6 42.1 L375.5 52.2 L377.8 52.2 L376.3 59.7 L379.6 59.7 L377.3 67.2 L381.8 67.2 L377.4 74.8 L381.9 74.8 Z"/></g><g class="ktn"><path d="M38.8 96 L27.1 85.7 L33.5 85.7 L30.2 77.2 L34.9 77.2 L32.0 68.8 L35.7 68.8 L32.5 60.4 L36.0 60.4 L38.8 49.1 L41.1 60.4 L43.9 60.4 L42.1 68.8 L46.2 68.8 L43.0 77.2 L48.0 77.2 L43.8 85.7 L49.9 85.7 Z"/><path d="M96.8 96 L83.8 87.0 L90.9 87.0 L88.0 79.7 L92.8 79.7 L87.6 72.3 L92.6 72.3 L90.0 65.0 L93.7 65.0 L96.8 55.2 L99.5 65.0 L102.7 65.0 L100.4 72.3 L104.8 72.3 L100.7 79.7 L105.4 79.7 L101.6 87.0 L107.4 87.0 Z"/><path d="M144.8 96 L135.6 83.9 L140.7 83.9 L136.5 73.9 L141.1 73.9 L138.4 64.0 L141.9 64.0 L139.7 54.0 L142.5 54.0 L144.8 40.8 L147.4 54.0 L150.6 54.0 L147.7 64.0 L151.2 64.0 L148.5 73.9 L153.1 73.9 L149.0 83.9 L154.2 83.9 Z"/><path d="M204.5 96 L191.8 84.6 L198.8 84.6 L192.8 75.2 L199.2 75.2 L194.5 65.8 L200.0 65.8 L196.2 56.5 L200.8 56.5 L204.5 44.0 L207.7 56.5 L211.5 56.5 L208.8 65.8 L214.0 65.8 L209.5 75.2 L215.6 75.2 L210.8 84.6 L218.4 84.6 Z"/><path d="M241.0 96 L230.6 81.6 L236.3 81.6 L232.3 69.9 L237.1 69.9 L233.7 58.1 L237.7 58.1 L235.6 46.4 L238.6 46.4 L241.0 30.7 L243.8 46.4 L247.1 46.4 L243.9 58.1 L247.5 58.1 L244.9 69.9 L249.7 69.9 L246.1 81.6 L252.3 81.6 Z"/><path d="M325.0 96 L312.8 84.5 L319.5 84.5 L313.5 75.1 L319.8 75.1 L315.6 65.7 L320.8 65.7 L316.7 56.3 L321.3 56.3 L325.0 43.8 L328.6 56.3 L333.0 56.3 L329.6 65.7 L335.2 65.7 L330.5 75.1 L337.1 75.1 L330.5 84.5 L337.2 84.5 Z"/><path d="M360.6 96 L350.6 85.7 L356.1 85.7 L351.2 77.3 L356.4 77.3 L354.5 68.9 L357.9 68.9 L355.4 60.4 L358.3 60.4 L360.6 49.2 L362.7 60.4 L365.2 60.4 L363.9 68.9 L367.8 68.9 L364.1 77.3 L368.3 77.3 L364.8 85.7 L370.0 85.7 Z"/></g></svg>
+      <div class="kground"></div><div class="kfr"></div><div class="kfr2"></div>
       <span class="kart" style="width:82px;height:82px">${flatSvg("tkTent")}</span>
       <span class="kart" style="width:50px;height:50px">${flatSvg("tkWalk")}</span></div>
     <div class="tkr">
@@ -5826,6 +5945,22 @@ function tap(el){
     drawBins(); drawHead(); save();
   }
 }
+/* 推进流程用它，不要裸 setTimeout。
+   ① 回调抛异常时兜到 render()，不至于整条链断掉；
+   ② rAF 兜底，定时器被系统降频也能走完。 */
+function step(fn, ms){
+  let done = false;
+  const t0 = now();
+  const go = () => {
+    if(done) return; done = true;
+    try{ fn(); }catch(e){ try{ render(); }catch(_){} }
+  };
+  const t = setTimeout(go, ms);
+  const beat = () => { if(done) return; if(now() - t0 >= ms){ clearTimeout(t); go(); }
+                       else requestAnimationFrame(beat); };
+  requestAnimationFrame(beat);
+}
+
 function afterPage(){
   drawBins(); drawHead(); save();
   const all = [...$("board").querySelectorAll('[data-side="L"]')].every(e => e.dataset.done);
@@ -5833,7 +5968,7 @@ function afterPage(){
   bumpStat("pages");
   // 拼写关只抓「慢对」和「来重练的错题」。本页刚栽的词不抓 —— 它已经在回错题盒的路上了。
   tq = page.pool.filter(x => !x._fell && (x._slow || x._lap));
-  setTimeout(() => tq.length ? typing() : render(), 620);
+  step(() => tq.length ? typing() : render(), 620);
 }
 function lock(e){ e.classList.remove("sel"); e.classList.add("ok"); e.dataset.done = 1; }
 /* 配对页答错时两张卡一起变红抖一下。名字必须和全屏闪现层区分开 ——
@@ -5845,6 +5980,13 @@ function shake(a, b){
 
 /* 拼错之后把正确拼写摆在屏幕正中，停 2 秒。点一下可以提前跳过。
    先 blur —— 手机上不收键盘的话，这个词正好被键盘挡住。 */
+/* 全屏闪现层。
+   这里踩过一个只在真机上出现的坑：原来关闭时先 setTimeout 200ms 等淡出、
+   再在回调里调 done()。iOS 上这一层是 position:fixed 的合成层，Safari 会把
+   它的动画帧推迟；如果这期间手指离开屏幕或者系统降频，那个 setTimeout 可能
+   迟迟不触发，done() 就永远不执行 —— 下一页再也出不来，而应用其他部分看着
+   完全正常，只能杀进程重开。
+   现在：done() 立刻执行，DOM 的清理才走延时；再加 rAF 兜底和总时限。 */
 function overlay(inner, ms, done){
   try{ document.activeElement && document.activeElement.blur(); }catch(e){}
   const o = document.createElement("div");
@@ -5852,15 +5994,30 @@ function overlay(inner, ms, done){
   o.innerHTML = `<div class="fx">${inner}<div class="fk">点一下继续</div></div>`;
   document.body.appendChild(o);
   requestAnimationFrame(() => o.classList.add("in"));
+
   let shut = false;
+  const t0 = now();
+  const drop = () => { if(o.parentNode) o.remove(); };
   const close = () => {
-    if(shut) return; shut = true;
+    if(shut) return;
+    shut = true;
     clearTimeout(timer);
     o.classList.remove("in");
-    setTimeout(() => { o.remove(); done && done(); }, 200);
+    setTimeout(drop, 220);
+    /* 先推进流程，再收拾画面 —— 反过来的话，画面收不掉就等于流程断了 */
+    try{ done && done(); }catch(e){ setTimeout(render, 0); }
   };
   const timer = setTimeout(close, ms);
+  /* rAF 兜底：定时器被降频时，只要还有一帧在画就能自己走完 */
+  const beat = () => { if(shut) return; if(now() - t0 >= ms) close(); else requestAnimationFrame(beat); };
+  requestAnimationFrame(beat);
   o.onclick = close;
+  /* 从后台切回来时，超时的层直接收掉 */
+  document.addEventListener("visibilitychange", function vc(){
+    if(document.visibilityState === "visible" && !shut && now() - t0 >= ms){
+      document.removeEventListener("visibilitychange", vc); close();
+    }
+  });
 }
 /* 拼写关：考的是拼写，所以并排给出正确的和你打错的，教训在差异里 */
 function flashWord(correct, typed, done){
@@ -5905,7 +6062,7 @@ function typing(){
       say(`拼对 —— 进 <b>${BINS[w.box].lb}</b>。`, "ok"); fly(from, w.box, w.en);
       speak(w.en);
       tq.shift(); drawBins(); drawHead(); save();
-      setTimeout(() => tq.length ? typing() : render(), 850);
+      step(() => tq.length ? typing() : render(), 850);
     }else{
       bumpErr(); toLapse(w);
       say(`拼错，是 <b>${w.en}</b> —— 进错题盒。`, "no"); fly(from, 0, w.en);
@@ -6376,7 +6533,18 @@ $("bTrek").onclick      = () => { rollStats(); tkTab = "a"; drawTrek(); $("dTrek
 $("bTrekClose").onclick = () => $("dTrek").close();
 document.querySelectorAll(".tkbar [data-tk]").forEach(b =>
   b.onclick = () => { tkTab = b.dataset.tk; drawTrek(); });
-$("bSkin").onclick      = () => { drawSkins(); drawBgUI(); $("dSkin").showModal(); };
+$("bSkin").onclick      = () => { drawSkins(); drawBgUI(); drawVoices(); drawRate(); $("dSkin").showModal(); };
+function drawRate(){
+  if(!$("vcRate")) return;
+  $("vcRate").value = Math.round(voiceRate * 100);
+  $("vcRateV").textContent = voiceRate.toFixed(2);
+}
+$("vcRate").oninput = e => {
+  voiceRate = +e.target.value / 100;
+  try{ localStorage.setItem(VRATE_KEY, e.target.value); }catch(err){}
+  $("vcRateV").textContent = voiceRate.toFixed(2);
+};
+$("vcRate").onchange = () => speak("sediment", {force:true});
 $("bSkinClose").onclick = () => $("dSkin").close();
 $("bBgPick").onclick = () => $("fBg").click();
 $("fBg").onchange    = e => { if(e.target.files[0]) pickBg(e.target.files[0]); e.target.value=""; };
@@ -6425,6 +6593,21 @@ setInterval(() => {
 
 let savedSkin = "y2k";
 try{ savedSkin = localStorage.getItem(SKIN_KEY) || "y2k"; }catch(e){}
+/* 看门狗：回到前台时，如果本该在配对页却一张牌都没有，说明上一次推进断了 —— 补渲染一次。
+   这条是最后一道防线，正常情况下永远不会触发。 */
+function heal(){
+  if(document.visibilityState !== "visible") return;
+  if(phase !== "match") return;
+  if(document.querySelector(".flash")) return;
+  const b = $("board");
+  if(b && b.querySelector('[data-side="L"]')) return;
+  if(!live().some(x => x.due <= now())) return;
+  try{ render(); }catch(e){}
+}
+document.addEventListener("visibilitychange", heal);
+addEventListener("pageshow", heal);
+addEventListener("focus", heal);
+
 applySkin(savedSkin);
 try{ applyVoice(localStorage.getItem(VOICE_KEY) !== "0"); }catch(e){ applyVoice(true); }
 $("ver").textContent = "词盒 " + APP_VER;
