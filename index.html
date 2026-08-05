@@ -1448,7 +1448,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v43";
+const APP_VER = "v44";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5783,20 +5783,49 @@ function pulseBin(k){
   el.classList.add("pulse"); setTimeout(()=>el.classList.remove("pulse"), 380);
 }
 /* SIGNATURE: 卡片飞进它该去的格子 */
+/* 飞进盒子的小动画。
+   这里踩过一个只在真机上出现、而且很难联想的坑：它靠 setTimeout 清理自己，
+   可 iOS 冻结定时器时这些 position:fixed 的元素就永久留在 DOM 里。每答对一张
+   留一个，几页下来几十个合成层，Safari 的绘制预算被耗尽 —— 症状是**卡片明明
+   已经生成并布局好了，屏幕上却不画出来**，打开任意一个面板强制重绘才会显形。
+   现在：三重清理（定时器 + transitionend + 下次进场时兜底扫），且总量封顶。 */
 function fly(from, k, text){
   const bin = $("bin"+k); if(!bin || !from) return pulseBin(k);
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return pulseBin(k);
+  /* 兜底扫：上一批要是没清干净，这次先收掉 */
+  const old = document.querySelectorAll(".fly");
+  if(old.length > 6) old.forEach(e => e.remove());
   const a = from.getBoundingClientRect(), b = bin.getBoundingClientRect();
   const g = document.createElement("div");
   g.className = "fly"; g.textContent = text;
   g.style.left = a.left + "px"; g.style.top = a.top + "px";
   document.body.appendChild(g);
+  let gone = false;
+  const kill = () => { if(gone) return; gone = true; g.remove(); pulseBin(k); };
+  g.addEventListener("transitionend", kill);
   requestAnimationFrame(() => {
     const gr = g.getBoundingClientRect();
     g.style.transform = `translate(${b.left + b.width/2 - gr.left - gr.width/2}px,${b.top + 10 - gr.top}px) scale(.55)`;
     g.style.opacity = "0";
   });
-  setTimeout(() => { g.remove(); pulseBin(k); }, 400);
+  setTimeout(kill, 400);
+}
+/* 每次重排前把残留的浮层一次扫光。这是唯一保证不累积的地方 —— 
+   前面那些清理都依赖定时器或事件，而它们恰恰是会被冻住的东西。 */
+/* 主动踢一次绘制。iOS 上整片替换 innerHTML 之后，如果祖先层是脏的，
+   新内容可能压根不会被画出来。读一次 offsetHeight 强制同步布局，
+   再切一下 opacity 让合成层失效重画。代价可以忽略，救的是整屏。 */
+function repaint(el){
+  if(!el) return;
+  requestAnimationFrame(() => {
+    void el.offsetHeight;
+    el.style.opacity = "0.999";
+    requestAnimationFrame(() => { el.style.opacity = ""; });
+  });
+}
+function sweep(){
+  document.querySelectorAll(".fly").forEach(e => e.remove());
+  document.querySelectorAll(".flash").forEach(e => { if(!e.classList.contains("in")) e.remove(); });
 }
 
 /* ---------- header ---------- */
@@ -5876,6 +5905,7 @@ function say(t, cls){ const m = $("msg"); m.className = "msg " + (cls||""); m.in
 
 /* ---------- match phase ---------- */
 function render(){
+  sweep();
   phase = "match"; sel = null; t0 = 0;
   drawBins(); drawHead(); say("");
   page = buildPage();
@@ -5892,6 +5922,7 @@ function render(){
   }
 
   const {dir, pool, dis} = page;
+  repaint($("board"));
   const lap = pool.some(w => w.box === 0);
   const mk  = pool.filter(w => w._mask).length;
   const tg  = [];
@@ -6069,6 +6100,7 @@ function flashSent(w, label, done){
 function typing(){
   const w = tq[0];
   if(!w) return render();
+  sweep();
   phase = "type"; hideHero();
 
   const board = $("board");
@@ -6117,6 +6149,7 @@ function clueHTML(w, lv){
 function examStep(){
   const w = eq[0];
   if(!w) return render();
+  sweep();
   phase = "exam"; hideHero(); hintLv = 0;
 
   const board = $("board");
