@@ -498,17 +498,24 @@
 
 /* ══════════════════════ 组件层（与皮肤无关） ══════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+/* 不给 body 定高。
+   body 同时有 height:100% 和 overflow-x:clip 时，按规范另一个轴的 visible
+   会计算成 auto —— body 就成了一个只有一屏高的滚动容器，超出的内容交给 Safari
+   自己处理，而那正是它丢绘制的地方（整块内容在 DOM 里、也布局了，就是不画）。
+   改成只保证最小高度，滚动交还给文档本身。 */
+html{height:100%}
+body{min-height:100%}
 html{overscroll-behavior-y:contain}
 button,.c,.bin,.chip,.u .nm,.u .sw,.tap{touch-action:manipulation}
 body{
   background:var(--bg-img),var(--bg); background-attachment:var(--bg-fix);
   color:var(--ink); font-family:var(--f-ui);
-  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased; overflow-x:clip;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-.gears{position:absolute;inset:0;pointer-events:none;z-index:0}
-body{position:relative}
+.gears{position:fixed;inset:0;pointer-events:none;z-index:0;contain:strict}
+/* .gears 需要一个包含块，但不能是 body —— 见上。给它一个自己的容器。 */
+.gears{position:fixed}
 .wrap{max-width:880px;margin:0 auto;padding:20px 18px 40px;position:relative;z-index:1}
 /* 自定义背景层。压在皮肤底色之上、内容之下 */
 #bgimg[hidden]{display:none}
@@ -835,7 +842,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
   border:1px solid #7A2A1E;border-radius:6px;padding:12px 14px;
   box-shadow:0 8px 28px rgba(0,0,0,.5)}
 #diagBox b{display:block;color:#FF8A6E;font-size:13px;margin-bottom:6px}
-#diagBox .dm{color:#FFEDE8;word-break:break-word;margin-bottom:6px}
+#diagBox .dm{color:#FFEDE8;word-break:break-word;margin-bottom:6px;white-space:pre-wrap;font-size:11px;line-height:1.7}
 #diagBox .dl{color:#C79A90;font-size:11px;word-break:break-all;margin-bottom:8px}
 #diagBox .dt{color:#A87F76;font-size:10.5px;line-height:1.55;max-height:180px;overflow:auto;
   border-top:1px solid #52201A;padding-top:7px}
@@ -1168,7 +1175,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
    结果是整块内容的绘制被丢掉：DOM 都在，屏幕上什么都没有，只能杀进程。
    现在挪进 .wrap 之前的一个专用容器，用 absolute 定位、不参与滚动合成，
    而且默认不转 —— 动效不值得拿整屏的可见性去换。 */
-[data-skin="y2k"] .gears{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+[data-skin="y2k"] .gears{overflow:hidden}
 [data-skin="y2k"] .gears::before{content:"";position:absolute;top:56px;right:-70px;
   width:300px;height:300px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' fill='rgba(48,66,90,0.16)' d='M99.8 45.6L99.8 54.4L88.5 56.3L86.5 63.8L95.4 71.1L90.9 78.8L80.2 74.7L74.7 80.2L78.8 90.9L71.1 95.4L63.8 86.5L56.3 88.5L54.4 99.8L45.6 99.8L43.7 88.5L36.2 86.5L28.9 95.4L21.2 90.9L25.3 80.2L19.8 74.7L9.1 78.8L4.6 71.1L13.5 63.8L11.5 56.3L0.2 54.4L0.2 45.6L11.5 43.7L13.5 36.2L4.6 28.9L9.1 21.2L19.8 25.3L25.3 19.8L21.2 9.1L28.9 4.6L36.2 13.5L43.7 11.5L45.6 0.2L54.4 0.2L56.3 11.5L63.8 13.5L71.1 4.6L78.8 9.1L74.7 19.8L80.2 25.3L90.9 21.2L95.4 28.9L86.5 36.2L88.5 43.7Z M50 33A17 17 0 1 0 50 67 A17 17 0 1 0 50 33Z'/%3E%3C/svg%3E") center/contain no-repeat;
   pointer-events:none}
@@ -1464,7 +1471,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v46";
+const APP_VER = "v47";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5419,21 +5426,32 @@ function armGuards(){
 }
 /* 沉默失败：什么都没抛，但屏幕就是空的。把现场量出来直接报，
    不然只能靠猜 —— 前面五次都是这么猜错的。 */
-function report(){
+/* 现场快照。上一版只在「屏幕空了」时才报，可屏幕并不是空的 ——
+   卡片就在 DOM 里，只是没画出来，所以那个条件永远不成立。
+   现在点表头无条件报，把能量的都量出来。 */
+function report(title){
   const b = document.getElementById("board");
   const nav = document.querySelector("nav.bar");
+  const L = b ? b.querySelectorAll('[data-side="L"]') : [];
+  const first = L[0];
+  const box = (e) => { if(!e) return "无"; const r = e.getBoundingClientRect();
+    return `${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}×${Math.round(r.height)}`; };
+  const vis = (e) => { if(!e) return "无"; const c = getComputedStyle(e);
+    return `${c.display}/${c.visibility}/op${c.opacity}/z${c.zIndex}`; };
   let due = "?"; try{ due = live().filter(x => x.due <= now()).length; }catch(e){}
   let spk = "?"; try{ spk = speechSynthesis.speaking ? "是" : "否"; }catch(e){}
-  diag("界面空了但没报错", { message:
-    "phase=" + phase + " 到期=" + due
-    + " page=" + (page ? page.pool.length + "张" : "null")
-    + " board子节点=" + (b ? b.childNodes.length : "无")
-    + " board高=" + (b ? b.offsetHeight : "?")
-    + " nav高=" + (nav ? nav.offsetHeight : "?")
-    + " body高=" + document.body.offsetHeight
-    + " fly=" + document.querySelectorAll(".fly").length
-    + " flash=" + document.querySelectorAll(".flash").length
-    + " 朗读=" + (voiceOn ? "开" : "关") + " 正在念=" + spk });
+  const wrap = document.querySelector(".wrap");
+  diagShown = false;
+  diag(title || "现场", { message:
+      `phase=${phase} 到期=${due} page=${page ? page.pool.length + "张" : "null"}\n`
+    + `左列牌数=${L.length} 第一张=${box(first)} ${vis(first)}\n`
+    + `board=${box(b)} ${vis(b)}\n`
+    + `nav=${box(nav)} ${vis(nav)}\n`
+    + `wrap=${box(wrap)} ${vis(wrap)}\n`
+    + `body高=${document.body.offsetHeight} 视窗高=${innerHeight} 滚动=${scrollY}\n`
+    + `fly=${document.querySelectorAll(".fly").length} flash=${document.querySelectorAll(".flash").length} `
+    + `dialog开=${[...document.querySelectorAll("dialog")].filter(x=>x.open).length}\n`
+    + `皮肤=${skin} 朗读=${voiceOn ? "开" : "关"} 正在念=${spk} 版本=${APP_VER}` });
 }
 addEventListener("error", e => diag("全局", e.error || e.message));
 addEventListener("unhandledrejection", e => diag("异步", e.reason));
@@ -6692,13 +6710,31 @@ $("fTxt").onchange   = e => { if(e.target.files.length) loadTxt(e.target.files);
 
 /* 万一还是卡住：点表头强制自救，不用杀进程。
    顺手把语音整个停掉 —— 它是最可能的元凶。 */
+/* 点表头 = 自救 + 现场快照。
+   卡住时先看横幅上的数字，它能一刀切开「没渲染 / 没布局 / 没绘制」三种情况。 */
 $("mast").addEventListener("click", () => {
   try{ speechSynthesis.cancel(); }catch(e){}
   sweep();
   heal(true);
-  const wrap = document.querySelector(".wrap");
-  if(wrap){ wrap.style.display = "none"; void wrap.offsetHeight; wrap.style.display = ""; }
+  hardRepaint();
+  report("点表头 · 现场");
 });
+/* 最狠的一记重绘。逐级加码：整棵树摘下再挂回去是最后手段，
+   但它一定能让 Safari 重新光栅化。 */
+function hardRepaint(){
+  const wrap = document.querySelector(".wrap");
+  if(!wrap) return;
+  try{
+    wrap.style.transform = "translateZ(0)";
+    void wrap.offsetHeight;
+    wrap.style.transform = "";
+    const b = $("board"), parent = b && b.parentNode, next = b && b.nextSibling;
+    if(b && parent){ parent.removeChild(b); void parent.offsetHeight; parent.insertBefore(b, next); }
+    document.documentElement.style.minHeight = (innerHeight + 1) + "px";
+    void document.documentElement.offsetHeight;
+    document.documentElement.style.minHeight = "";
+  }catch(e){ diag("强制重绘", e); }
+}
 $("bVoice").onclick = () => applyVoice(!voiceOn);
 {
   let hold = 0, slow = false;
@@ -6784,21 +6820,6 @@ try{ savedSkin = localStorage.getItem(SKIN_KEY) || "y2k"; }catch(e){}
      · 见到 .flash 就返回 —— 可残留的 .flash 恰恰是卡死的产物。
    现在改成只看一件事：**屏幕上有没有东西可看**。没有就重建，
    不管当时自称在哪个阶段、有没有残留的层。 */
-/* 沉默失败：什么都没抛，但屏幕上就是空的。把现场量出来直接报，
-   不然只能靠猜 —— 前面五次都是这么猜错的。 */
-function report(){
-  const b = $("board");
-  const due = live().filter(x => x.due <= now()).length;
-  const nav = document.querySelector("nav.bar");
-  diag("界面空了但没报错", {
-    message:
-      `phase=${phase} 到期=${due} page=${page ? page.pool.length + "张" : "null"} ` +
-      `board子节点=${b ? b.childNodes.length : "无"} board高=${b ? b.offsetHeight : "?"} ` +
-      `nav高=${nav ? nav.offsetHeight : "?"} body高=${document.body.offsetHeight} ` +
-      `fly=${document.querySelectorAll(".fly").length} flash=${document.querySelectorAll(".flash").length} ` +
-      `朗读=${voiceOn ? "开" : "关"} 卡住的语音=${(()=>{try{return speechSynthesis.speaking?"是":"否"}catch(e){return "?"}})()}`
-  });
-}
 function stale(){
   const b = $("board");
   if(!b) return false;
