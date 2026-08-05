@@ -827,6 +827,22 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 
+
+/* 诊断横幅 */
+#diagBox{position:fixed;left:0;right:0;top:0;z-index:9999;padding:10px;
+  font:400 12px/1.6 ui-monospace,Menlo,monospace;pointer-events:auto}
+#diagBox .dg{max-width:560px;margin:0 auto;background:#2A0E0E;color:#FFD9D2;
+  border:1px solid #7A2A1E;border-radius:6px;padding:12px 14px;
+  box-shadow:0 8px 28px rgba(0,0,0,.5)}
+#diagBox b{display:block;color:#FF8A6E;font-size:13px;margin-bottom:6px}
+#diagBox .dm{color:#FFEDE8;word-break:break-word;margin-bottom:6px}
+#diagBox .dl{color:#C79A90;font-size:11px;word-break:break-all;margin-bottom:8px}
+#diagBox .dt{color:#A87F76;font-size:10.5px;line-height:1.55;max-height:180px;overflow:auto;
+  border-top:1px solid #52201A;padding-top:7px}
+#diagBox .dx{margin-top:10px;padding:7px 14px;border:1px solid #7A2A1E;border-radius:4px;
+  background:#3D1512;color:#FFD9D2;font:inherit;cursor:pointer;box-shadow:none;letter-spacing:0;
+  text-transform:none}
+
 /* ══════════════════ 远征 —— 独立于皮肤 ══════════════════
    自带一套固定配色，不走令牌。远征是只读的，你不在上面做任何操作；
    皮肤是给要点几百次的控件用的，拿工作台的语言画地图两边都别扭。
@@ -1267,7 +1283,7 @@ select.sel{font-family:var(--f-read);font-size:14px;font-weight:600;padding:11px
 
 <div class="wrap">
 
-  <header class="mast shell">
+  <header class="mast shell" id="mast" title="卡住时点这里，强制重画一次">
     <div class="logo">
       <h1>词盒</h1><span>Wordbox</span>
     </div>
@@ -1448,7 +1464,7 @@ const PAGE = 5, DISTRACT = 2;
 const KEY = "wordbox.v1";
 const DEF_UNIT = "默认";
 /* 和 sw.js 里的 VER 保持一致。改代码时两处一起加。 */
-const APP_VER = "v44";
+const APP_VER = "v46";
 /* 第四个字段写这些之中任意一个 = 这个词不进阶段考，只做认词卡。
    给 super、interesting 这类语义太泛、填空没有唯一解的词用。 */
 const NOFILL = new Set(["-", "noexam", "nofill", "不考", "跳过填空"]);
@@ -5360,6 +5376,68 @@ async function clearBg(){
 
 
 
+/* ---------- 诊断 ----------
+   连着猜错五次之后加的。真机上接不了调试器，所以把错误直接摆到屏幕上：
+   任何异常都会在顶部弹一条红色横幅，写明哪个函数、哪一行、什么消息，
+   外加最近十几步的足迹。截图发回来就够定位了。 */
+const TRACE = [];
+function trace(tag){
+  TRACE.push(new Date().toTimeString().slice(0,8) + " " + tag);
+  if(TRACE.length > 18) TRACE.shift();
+}
+let diagShown = false, healMiss = 0;
+function diag(where, err){
+  const msg = (err && (err.message || err)) || "未知";
+  const line = err && err.stack ? (String(err.stack).split("\n")[1] || "").trim().slice(0, 90) : "";
+  trace("✗ " + where + ": " + msg);
+  if(diagShown) return;
+  diagShown = true;
+  const box = document.createElement("div");
+  box.id = "diagBox";
+  box.innerHTML = '<div class="dg"><b>出错了：' + esc(where) + '</b>'
+    + '<div class="dm">' + esc(String(msg)) + '</div>'
+    + (line ? '<div class="dl">' + esc(line) + '</div>' : "")
+    + '<div class="dt">' + TRACE.map(esc).join("<br>") + '</div>'
+    + '<button class="dx">知道了</button></div>';
+  document.body.appendChild(box);
+  box.querySelector(".dx").onclick = () => { box.remove(); diagShown = false; };
+}
+function guard(name, fn){
+  const g = function(){
+    try{ trace(name); return fn.apply(this, arguments); }
+    catch(e){ diag(name, e); throw e; }
+  };
+  g.__armed = 1;
+  return g;
+}
+/* 不能挂在 load 事件里 —— 脚本执行时 load 可能已经过去了 */
+function armGuards(){
+  ["render","typing","examStep","afterPage","buildPage","drawHero","fitHero"].forEach(n => {
+    const f = window[n];
+    if(typeof f === "function" && !f.__armed) window[n] = guard(n, f);
+  });
+}
+/* 沉默失败：什么都没抛，但屏幕就是空的。把现场量出来直接报，
+   不然只能靠猜 —— 前面五次都是这么猜错的。 */
+function report(){
+  const b = document.getElementById("board");
+  const nav = document.querySelector("nav.bar");
+  let due = "?"; try{ due = live().filter(x => x.due <= now()).length; }catch(e){}
+  let spk = "?"; try{ spk = speechSynthesis.speaking ? "是" : "否"; }catch(e){}
+  diag("界面空了但没报错", { message:
+    "phase=" + phase + " 到期=" + due
+    + " page=" + (page ? page.pool.length + "张" : "null")
+    + " board子节点=" + (b ? b.childNodes.length : "无")
+    + " board高=" + (b ? b.offsetHeight : "?")
+    + " nav高=" + (nav ? nav.offsetHeight : "?")
+    + " body高=" + document.body.offsetHeight
+    + " fly=" + document.querySelectorAll(".fly").length
+    + " flash=" + document.querySelectorAll(".flash").length
+    + " 朗读=" + (voiceOn ? "开" : "关") + " 正在念=" + spk });
+}
+addEventListener("error", e => diag("全局", e.error || e.message));
+addEventListener("unhandledrejection", e => diag("异步", e.reason));
+
 /* ---------- 朗读 ----------
    一条铁律：在你答出来之前，绝不能把答案念出来。
    中译英那一页、残缺牌、拼写关和阶段考的题面，都属于「还没答」，一律不念。
@@ -5468,17 +5546,47 @@ function unlockVoice(){
 addEventListener("pointerdown", unlockVoice, {once:true});
 addEventListener("keydown", unlockVoice, {once:true});
 
+/* 朗读。
+   这里有个 iOS 上会把整个页面卡死的坑：原来每次都是 cancel() 紧接着 speak()，
+   而语音服务在上一次取消还没完成时收到新请求，会连同 WebKit 进程一起锁住 ——
+   表现是屏幕停在半渲染状态、点什么都没反应，只能杀进程。
+   现在：① 不再无条件 cancel，只在确实在说话时才取消，而且取消后隔一帧再发；
+        ② 节流，同一个词短时间内不重复念；
+        ③ 看门狗，超时没收到 onend 就认为服务卡了，自动停掉并跳过这次。 */
+let sayAt = 0, sayLast = "", sayGuard = 0, speechBad = false;
 function speak(text, opt){
-  if(!text || !("speechSynthesis" in window)) return;
+  if(!text || !("speechSynthesis" in window) || speechBad) return;
   if(!voiceOn && !(opt && opt.force)) return;
+  const t = String(text), force = !!(opt && opt.force);
+  const tNow = Date.now();
+  /* 节流：同一个词 900ms 内不重念。手指连点时最容易触发那个死锁。 */
+  if(!force && t === sayLast && tNow - sayAt < 900) return;
+  sayLast = t; sayAt = tNow;
+
+  const fire = () => {
+    try{
+      const u = new SpeechSynthesisUtterance(t);
+      if(enVoice){ u.voice = enVoice; u.lang = enVoice.lang; } else u.lang = "en-GB";
+      u.rate = (opt && opt.slow) ? Math.max(.4, voiceRate - .26) : voiceRate;
+      u.pitch = 1;
+      clearTimeout(sayGuard);
+      const clear = () => clearTimeout(sayGuard);
+      u.onend = clear; u.onerror = clear;
+      /* 一句话最长按 12 秒算，超了就是服务卡了 */
+      sayGuard = setTimeout(() => {
+        try{ speechSynthesis.cancel(); }catch(e){}
+      }, 12000);
+      speechSynthesis.speak(u);
+    }catch(e){ speechBad = true; }
+  };
+
   try{
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(String(text));
-    if(enVoice){ u.voice = enVoice; u.lang = enVoice.lang; } else u.lang = "en-GB";
-    u.rate = (opt && opt.slow) ? Math.max(.4, voiceRate - .26) : voiceRate;
-    u.pitch = 1;
-    speechSynthesis.speak(u);
-  }catch(e){}
+    if(speechSynthesis.speaking || speechSynthesis.pending){
+      speechSynthesis.cancel();
+      /* 关键：取消和下一次发声之间必须隔开，不能同一个 tick 里连着来 */
+      setTimeout(fire, 120);
+    }else fire();
+  }catch(e){ speechBad = true; }
 }
 function applyVoice(on){
   voiceOn = !!on;
@@ -6582,6 +6690,15 @@ $("bUnitDel").onclick    = delUnit;
 $("bFile").onclick   = () => $("fTxt").click();
 $("fTxt").onchange   = e => { if(e.target.files.length) loadTxt(e.target.files); e.target.value=""; };
 
+/* 万一还是卡住：点表头强制自救，不用杀进程。
+   顺手把语音整个停掉 —— 它是最可能的元凶。 */
+$("mast").addEventListener("click", () => {
+  try{ speechSynthesis.cancel(); }catch(e){}
+  sweep();
+  heal(true);
+  const wrap = document.querySelector(".wrap");
+  if(wrap){ wrap.style.display = "none"; void wrap.offsetHeight; wrap.style.display = ""; }
+});
 $("bVoice").onclick = () => applyVoice(!voiceOn);
 {
   let hold = 0, slow = false;
@@ -6667,6 +6784,21 @@ try{ savedSkin = localStorage.getItem(SKIN_KEY) || "y2k"; }catch(e){}
      · 见到 .flash 就返回 —— 可残留的 .flash 恰恰是卡死的产物。
    现在改成只看一件事：**屏幕上有没有东西可看**。没有就重建，
    不管当时自称在哪个阶段、有没有残留的层。 */
+/* 沉默失败：什么都没抛，但屏幕上就是空的。把现场量出来直接报，
+   不然只能靠猜 —— 前面五次都是这么猜错的。 */
+function report(){
+  const b = $("board");
+  const due = live().filter(x => x.due <= now()).length;
+  const nav = document.querySelector("nav.bar");
+  diag("界面空了但没报错", {
+    message:
+      `phase=${phase} 到期=${due} page=${page ? page.pool.length + "张" : "null"} ` +
+      `board子节点=${b ? b.childNodes.length : "无"} board高=${b ? b.offsetHeight : "?"} ` +
+      `nav高=${nav ? nav.offsetHeight : "?"} body高=${document.body.offsetHeight} ` +
+      `fly=${document.querySelectorAll(".fly").length} flash=${document.querySelectorAll(".flash").length} ` +
+      `朗读=${voiceOn ? "开" : "关"} 卡住的语音=${(()=>{try{return speechSynthesis.speaking?"是":"否"}catch(e){return "?"}})()}`
+  });
+}
 function stale(){
   const b = $("board");
   if(!b) return false;
@@ -6689,20 +6821,28 @@ function heal(force){
     if(wrap){ wrap.style.display = "none"; void wrap.offsetHeight; wrap.style.display = ""; }
     return;
   }
-  if(!stale()) return;
+  if(!stale()){ healMiss = 0; return; }
   try{
     if(phase === "type" && tq.length) typing();
     else if(phase === "exam" && eq.length) examStep();
     else render();
-  }catch(e){ try{ render(); }catch(_){} }
+  }catch(e){ diag("自愈失败", e); try{ render(); }catch(_){} }
+  /* 自愈了两次还是空的 —— 说明问题不在「没渲染」，把现场报出来 */
+  if(stale() && ++healMiss >= 2) report();
 }
 /* 定期自检。真机上冻结可能发生在任何时刻，而且不一定伴随可见性变化，
    所以除了切前台，还要有个心跳。两秒一次，只做一次 DOM 查询，开销可以忽略。 */
 setInterval(() => { if(document.visibilityState === "visible") heal(); }, 2000);
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState !== "visible"){
+    try{ speechSynthesis.cancel(); }catch(e){}   // 后台残留的朗读回来时最容易卡住服务
+  }
+});
 document.addEventListener("visibilitychange", heal);
 addEventListener("pageshow", heal);
 addEventListener("focus", heal);
 
+armGuards();
 applySkin(savedSkin);
 try{ applyVoice(localStorage.getItem(VOICE_KEY) !== "0"); }catch(e){ applyVoice(true); }
 $("ver").textContent = "词盒 " + APP_VER;

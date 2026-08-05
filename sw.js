@@ -1,6 +1,6 @@
 /* 词盒 — 离线缓存
    改了 index.html 之后，把 VER 加 1，刷新两次即可更新。 */
-const VER = "wordbox-v44";
+const VER = "wordbox-v46";
 const ASSETS = [
   "./",
   "./index.html",
